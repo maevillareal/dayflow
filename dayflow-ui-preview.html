@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAYFLOW UI Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#111722; --sidebar:#1B2533; --card:#202D3D; --card2:#26354A;
+  --pink:#F4B8CE; --pink2:#F8D5E2; --rose:#D98CAB;
+  --text:#F5F6FA; --muted:#AAB4C3; --border:#354154;
+  --pink-soft:rgba(244,184,206,.12); --ok:#9FD8B8; --slate:#8A97AB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px;height:100vh;overflow:hidden}
+[hidden]{display:none!important}
+.window{display:flex;flex-direction:column;height:100vh}
+.titlebar{height:34px;background:#0D121B;display:flex;align-items:center;justify-content:space-between;padding:0 0 0 14px;border-bottom:1px solid #1a2230;flex-shrink:0}
+.titlebar .brand{font-size:12px;color:var(--muted);letter-spacing:.08em;font-weight:600;display:flex;gap:8px;align-items:center}
+.titlebar .brand svg{color:var(--pink)}
+.winbtns{display:flex}.winbtns span{width:46px;height:34px;display:grid;place-items:center;color:var(--muted)}
+.winbtns span:hover{background:#1f2836}.winbtns span:last-child:hover{background:#c42b1c;color:#fff}
+.app{display:flex;flex:1;min-height:0}
+.app.auth .sidebar{display:none}
+.app.auth main{padding:0;display:flex}
+
+/* ---------- sidebar ---------- */
+.sidebar{width:236px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px;transition:width .2s;flex-shrink:0}
+.sidebar.collapsed{width:68px}
+.sidebar.collapsed .label,.sidebar.collapsed .logo-text{display:none}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.logo-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--rose));display:grid;place-items:center;color:#2a1a22;flex-shrink:0}
+.logo-mark svg{width:18px;height:18px}
+.logo-text b{font-size:15px;letter-spacing:.12em}.logo-text small{display:block;color:var(--muted);font-size:11px}
+.datecard{display:flex;align-items:center;gap:12px;padding:2px 6px 18px}
+.datecard .tile{width:46px;border-radius:12px;overflow:hidden;background:var(--card2);border:1px solid var(--border);text-align:center;flex-shrink:0}
+.datecard .tile span{display:block;background:var(--pink);color:#2a1a22;font-size:10px;font-weight:700;letter-spacing:.12em;padding:2px 0}
+.datecard .tile b{display:block;font-size:20px;font-weight:700;padding:3px 0 4px}
+.datecard .logo-text b{font-size:15px;letter-spacing:0;font-weight:600}
+.datecard .logo-text small{font-size:12px;margin-top:1px}
+.sidebar.collapsed .datecard{padding-left:0;padding-right:0;justify-content:center}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow:auto}
+.nav a,.nav .grp{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:10px;color:var(--muted);text-decoration:none;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;position:relative;background:none;border:0;font:inherit;width:100%;text-align:left}
+.nav a:hover,.nav .grp:hover{background:#223044;color:var(--text)}
+.nav a.active{background:var(--pink-soft);color:var(--pink)}
+.nav a.active::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--pink)}
+.nav svg{width:18px;height:18px;flex-shrink:0}
+.nav .grp .label{flex:1}
+.nav .grp .grp-chev{width:15px;height:15px}
+.nav .sub{display:flex;flex-direction:column;gap:2px;position:relative}
+.nav .sub::before{content:"";position:absolute;left:19px;top:4px;bottom:4px;width:1px;background:var(--border)}
+.nav .sub a{padding-left:34px}
+.nav .sub a svg{width:16px;height:16px}
+.sidebar.collapsed .nav .sub a{padding-left:10px}
+.sidebar.collapsed .nav .sub::before{display:none}
+.side-foot{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.side-foot button{background:none;border:0;color:var(--muted);display:flex;gap:12px;align-items:center;padding:8px 10px;border-radius:10px;cursor:pointer;font:inherit}
+.side-foot button:hover{background:#223044;color:var(--text)}
+.side-foot svg{width:18px;height:18px;flex-shrink:0}
+.ext-status{display:flex;gap:10px;align-items:center;padding:8px 10px;font-size:12px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:#6b7688;flex-shrink:0;margin:0 5px}
+
+/* ---------- base ---------- */
+main{flex:1;overflow:auto;padding:26px 30px 60px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+h1{font-size:24px;font-weight:600;letter-spacing:-.01em}
+h2{font-size:17px;font-weight:600}
+.sub{color:var(--muted);margin-top:4px}
+.hero-head{flex:1;min-width:280px}
+.hero-head .greet{color:var(--muted);font-size:15px;font-weight:500}
+.hero-head .motto{font-size:clamp(34px,4.2vw,58px);font-weight:700;letter-spacing:-.03em;line-height:1.04;margin-top:6px;color:var(--pink2)}
+.hero-head .motto q{quotes:"\201C" "\201D"}
+.hero-head .motto q::before,.hero-head .motto q::after{color:var(--pink)}
+.topbar.hero{align-items:center;margin-bottom:26px}
+.seg{display:flex;background:var(--sidebar);border:1px solid var(--border);border-radius:12px;padding:3px;flex-wrap:wrap}
+.seg button{background:none;border:0;color:var(--muted);padding:7px 12px;border-radius:9px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:var(--pink);color:#2a1a22;font-weight:600}
+.seg.sm{border-radius:10px;padding:2px}.seg.sm button{padding:4px 10px;font-size:12px;border-radius:8px}
+.grid{display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;min-width:0}
+.card h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.card h3 .t{display:flex;gap:8px;align-items:center}
+.card h3 .t svg{width:16px;height:16px;color:var(--pink)}
+.muted{color:var(--muted)}
+.btn{background:var(--pink);color:#2a1a22;border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;display:inline-flex;gap:8px;align-items:center;justify-content:center;transition:transform .1s,background .15s}
+.btn:hover{background:var(--pink2)}.btn:active{transform:scale(.98)}
+.btn svg{width:16px;height:16px}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn.ghost:hover{border-color:var(--pink);color:var(--pink)}
+.btn.sm{padding:6px 10px;font-size:12px}
+.btn.block{width:100%}
+.link{background:none;border:0;font:inherit;font-size:13px;color:var(--pink);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.link svg{width:15px;height:15px}.link.muted{color:var(--muted)}.link:hover{text-decoration:underline}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:var(--sidebar);border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;cursor:pointer;position:relative;flex-shrink:0}
+.icon-btn:hover{color:var(--pink);border-color:var(--pink)}
+.icon-btn svg{width:17px;height:17px}
+.icon-btn.sm{width:32px;height:32px}.icon-btn.sm svg{width:15px;height:15px}
+.icon-btn:disabled{opacity:.35;cursor:default;border-color:var(--border);color:var(--muted)}
+.icon-btn .badge{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px var(--sidebar)}
+.hdr-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;padding:3px 8px;border-radius:20px;background:#2b3a4f;color:var(--muted);white-space:nowrap;display:inline-flex;gap:4px;align-items:center}
+.tag svg{width:12px;height:12px}
+.tag.high{background:rgba(217,140,171,.18);color:var(--pink)}
+.tag.pink{background:var(--pink-soft);color:var(--pink)}
+.tag.ok{background:rgba(159,216,184,.14);color:var(--ok)}
+.bar{height:6px;background:#2b3a4f;border-radius:6px;overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;background:var(--pink);border-radius:6px;transition:width .5s}
+
+/* ---------- login ---------- */
+.login-wrap{flex:1;display:grid;place-items:center;padding:90px 16px 40px;background:radial-gradient(640px 420px at 50% 28%,rgba(244,184,206,.10),transparent 70%)}
+.login-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:34px 28px 26px;position:relative;box-shadow:0 30px 60px rgba(0,0,0,.35)}
+.login-pets{position:absolute;top:-70px;left:0;right:0;display:flex;justify-content:center;gap:0;pointer-events:none}
+.login-pets .mascot{width:84px;height:84px}
+.login-card .logo{justify-content:center;padding:0 0 6px}
+.login-card h1{text-align:center;font-size:22px;margin-top:10px}
+.login-card .sub{text-align:center;margin-bottom:8px}
+.lb{font-size:12px;color:var(--muted);display:block;margin:16px 0 6px}
+.inp{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:0 12px;transition:border-color .15s}
+.inp:focus-within{border-color:var(--pink)}
+.inp input{flex:1;min-width:0;background:none;border:0;color:var(--text);font:inherit;padding:12px 0;outline:none}
+.inp input::placeholder{color:#6f7b8e}
+.inp svg{width:16px;height:16px;color:var(--muted);flex-shrink:0}
+.inp button{background:none;border:0;color:var(--muted);cursor:pointer;display:grid;padding:4px}
+.inp button:hover{color:var(--pink)}
+.login-row{display:flex;justify-content:space-between;align-items:center;margin:14px 0 18px;font-size:13px}
+.chk{display:flex;align-items:center;gap:8px;color:var(--muted);cursor:pointer}
+.chk input{accent-color:var(--pink);width:15px;height:15px}
+.login-foot{text-align:center;color:var(--muted);font-size:13px;margin-top:18px}
+
+/* ---------- dropdown ---------- */
+.dd{position:relative}
+.dd-btn{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;background:var(--sidebar);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:9px 12px;font:inherit;font-weight:500;cursor:pointer;min-width:200px;transition:border-color .15s}
+.dd-btn .l{display:flex;gap:9px;align-items:center}
+.dd-btn svg{width:16px;height:16px}
+.dd-btn .l svg{color:var(--pink)}
+.dd-btn:hover,.dd.open .dd-btn{border-color:var(--pink)}
+.dd .chev{color:var(--muted);transition:transform .15s}
+.dd.open .chev{transform:rotate(180deg)}
+.dd-menu{position:absolute;right:0;top:calc(100% + 6px);min-width:280px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,.5);padding:6px;z-index:30;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .12s,transform .12s,visibility .12s}
+.dd.open .dd-menu{opacity:1;visibility:visible;transform:none}
+.dd-item{width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;background:none;border:0;color:var(--text);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.dd-item:hover,.dd-item:focus-visible{background:#223044;outline:none}
+.dd-item.sel{background:var(--pink-soft);color:var(--pink)}
+.dd-item .ii{width:28px;height:28px;border-radius:8px;background:#2b3a4f;display:grid;place-items:center;flex-shrink:0;color:var(--muted)}
+.dd-item.sel .ii{background:rgba(244,184,206,.2);color:var(--pink)}
+.dd-item .ii svg{width:15px;height:15px}
+.dd-item .tx{flex:1}.dd-item .tx small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+.dd-item .pc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dd-item .ck{width:16px;display:grid;place-items:center;color:var(--pink)}.dd-item .ck svg{width:15px;height:15px}
+.dd-sep{height:1px;background:var(--border);margin:6px 4px}
+.dd-cap{font-size:11px;color:var(--muted);letter-spacing:.06em;padding:6px 10px 4px}
+
+/* ---------- dashboard ---------- */
+.dash-top{grid-template-columns:1.35fr 1fr 1fr}
+.dash-bottom{grid-template-columns:2fr 1fr}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin:0 -4px 6px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;font-weight:500;padding:10px 8px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.tabs button:hover{color:var(--text)}
+.tabs button.on{color:var(--pink);border-color:var(--pink)}
+.tabs .cnt{font-size:11px;background:#2b3a4f;color:var(--muted);border-radius:10px;padding:1px 6px}
+.tabs button.on .cnt{background:var(--pink-soft);color:var(--pink)}
+.scroll{max-height:268px;overflow:auto;margin-right:-8px;padding-right:8px}
+.rem{display:flex;flex-direction:column}
+.rem .pet{display:grid;place-items:center;margin:6px 0 2px}
+.rem .pet .mascot{width:104px;height:104px}
+.rem .who{font-size:11px;color:var(--pink);font-weight:600;letter-spacing:.06em;text-align:center}
+.rem .msg{font-size:15px;line-height:1.45;text-align:center;margin:6px 4px 0;font-weight:500}
+.rem .acts{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap}
+.kstack{display:grid;gap:16px;grid-template-rows:repeat(3,auto)}
+.kpi{display:flex;flex-direction:column}
+.kpi .lab{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:6px}
+.kpi .lab svg{width:14px;height:14px}
+.kpi .big{font-size:32px;font-weight:600;letter-spacing:-.02em;margin-top:6px;line-height:1.1}
+.kpi .big small{font-size:14px;color:var(--muted);font-weight:500;margin-left:3px}
+.kpi .note{color:var(--muted);font-size:12px;margin-top:3px}
+.kpi.hl{background:linear-gradient(135deg,rgba(244,184,206,.30),rgba(217,140,171,.10) 55%,var(--card));border-color:rgba(244,184,206,.45)}
+.kpi.hl .lab{color:var(--pink2)}
+.kpi.dash{border-style:dashed;background:transparent}
+.kpi-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.kpi-row{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.chip-up{background:rgba(159,216,184,.14);color:var(--ok);font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;display:inline-flex;gap:3px;align-items:center}
+.chip-up svg{width:11px;height:11px}
+.segbar{display:flex;gap:5px;margin-top:10px}.segbar i{height:6px;border-radius:6px;background:var(--pink)}.segbar i.rest{background:#2f4058}
+.chart-box{position:relative;height:300px;margin-top:12px}
+.chart-box.sm{height:230px}
+.legend{display:flex;gap:6px 12px;align-items:center;font-size:12px;color:var(--muted);font-weight:400;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.legend i,.lgchip i{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.lgchip{display:inline-flex;align-items:center;gap:6px;background:none;border:0;cursor:pointer;padding:3px 6px;border-radius:8px;color:var(--muted);font:inherit;font-size:12px;transition:opacity .15s,background .15s}
+.lgchip:hover{background:#26354A;color:var(--text)}
+.lgchip.off{opacity:.35}
+.spark{display:block;flex-shrink:0}
+.ring{flex-shrink:0}
+
+/* ---------- lists ---------- */
+.check{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid #2b3a4f;cursor:pointer}
+.check:last-child{border-bottom:0}
+.box{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);display:grid;place-items:center;flex-shrink:0;transition:all .15s}
+.box svg{width:13px;height:13px;color:#2a1a22;opacity:0}
+.check.done .box{background:var(--pink);border-color:var(--pink)}
+.check.done .box svg{opacity:1}
+.check.done .lbl b{color:var(--muted);text-decoration:line-through}
+.check .lbl{flex:1;min-width:0}
+.check .lbl b{font-weight:500;display:block}
+.check .lbl small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sec-lab{font-size:11px;color:var(--muted);letter-spacing:.06em;margin:10px 4px 2px;display:flex;align-items:center;gap:6px}
+.sec-lab svg{width:13px;height:13px}
+.task{display:flex;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px solid #2b3a4f}
+.task .lbl{flex:1}.task .lbl small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.search{display:flex;gap:8px;align-items:center;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--muted);min-width:220px}
+.search svg{width:15px;height:15px}
+.search input{background:none;border:0;color:var(--text);font:inherit;outline:none;width:100%}
+
+/* ---------- stats ---------- */
+.stats{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.stat .k{color:var(--muted);font-size:12px;display:flex;gap:6px;align-items:center}
+.stat .k svg{width:14px;height:14px}
+.stat .v{font-size:26px;font-weight:700;margin-top:8px;letter-spacing:-.02em}
+.stat .v small{font-size:13px;color:var(--muted);font-weight:500}
+
+/* ---------- calendar (progress) ---------- */
+.cal-row{grid-template-columns:2fr 1fr}
+.cal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cal-head .mon{display:flex;align-items:center;gap:10px}
+.cal-head .mon b{font-size:17px;font-weight:600;min-width:140px;text-align:center}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:16px}
+.cal .wd{font-size:11px;color:var(--muted);text-align:center;padding-bottom:2px;letter-spacing:.04em}
+.day{background:var(--card2);border:1px solid transparent;border-radius:12px;min-height:82px;padding:8px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;text-align:left;font:inherit;color:var(--text);transition:border-color .15s,background .15s}
+.day:hover{border-color:var(--rose)}
+.day.blank{background:none;cursor:default;border:0}
+.day.future{opacity:.4;cursor:default}
+.day.future:hover{border-color:transparent}
+.day.today{border-color:var(--pink)}
+.day.sel{background:rgba(244,184,206,.16);border-color:var(--pink)}
+.day .n{font-size:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.day .n svg{width:12px;height:12px;color:var(--pink)}
+.day .dots{display:flex;flex-wrap:wrap;gap:4px}
+.day .dots i{width:9px;height:9px;border-radius:50%}
+.cal-legend{display:flex;gap:8px 16px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted)}
+.cal-legend span{display:flex;align-items:center;gap:6px}
+.cal-legend i{width:9px;height:9px;border-radius:50%}
+.drow{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #2b3a4f}
+.drow:last-child{border-bottom:0}
+.drow .tx{flex:1;min-width:0}.drow .tx b{font-weight:500;font-size:13px}
+.drow .tx .bar{height:5px;margin-top:6px}
+.drow .val{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.donut{display:grid;grid-template-columns:170px 1fr;gap:20px;align-items:center;margin-top:14px}
+.donut .cv{position:relative;height:170px}
+.center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none}
+.center b{font-size:22px;font-weight:700;display:block}.center small{color:var(--muted);font-size:11px}
+.lg-list>div{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;border-bottom:1px solid #2b3a4f}
+.lg-list>div:last-child{border-bottom:0}
+.lg-list span{display:flex;align-items:center;gap:8px}
+.lg-list i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.halves{grid-template-columns:1fr 1fr}
+.perf-row{grid-template-columns:2fr 1fr}
+
+/* ---------- habit table ---------- */
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;color:var(--muted);font-weight:500;padding:8px;text-align:center}
+th:first-child,td:first-child{text-align:left}
+td{padding:10px 8px;border-top:1px solid #2b3a4f;text-align:center}
+.cell{width:26px;height:26px;border-radius:8px;display:inline-grid;place-items:center;border:1.5px solid var(--border);cursor:pointer}
+.cell.on{background:var(--pink);border-color:var(--pink);color:#2a1a22}
+.cell.off{border-style:dashed;opacity:.35;cursor:default}
+.cell svg{width:14px;height:14px}
+.hname b{font-weight:500;display:block}.hname small{color:var(--muted);font-size:12px}
+.grp-row td{background:#1d2938;padding:9px 10px;text-align:left;font-size:13px;border-top:1px solid var(--border)}
+.grp-row td>span{display:inline-flex;align-items:center;gap:8px}
+.grp-row svg{width:15px;height:15px;color:var(--muted)}
+.grp-row .muted{font-size:12px;margin-left:4px}
+tbody tr:first-child.grp-row td{border-top:0}
+.cell[data-h]:hover{border-color:var(--pink)}
+
+/* ---------- focus / skincare ---------- */
+.focus-grid{grid-template-columns:1fr 1.3fr 1fr}
+.skin-grid{grid-template-columns:1fr 1fr 1.1fr}
+.timer{display:grid;place-items:center;padding:20px 0}
+.timer svg.ringbig{width:260px;height:260px}
+.timer .time{font-size:52px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{padding:7px 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font:inherit;font-size:13px;cursor:pointer}
+.chip.on{border-color:var(--pink);color:var(--pink);background:var(--pink-soft)}
+.field{margin-bottom:16px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.select{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 12px;font:inherit}
+.mode{border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;margin-bottom:8px;display:flex;gap:12px}
+.mode.on{border-color:var(--pink);background:var(--pink-soft)}
+.mode svg{color:var(--pink);width:18px;height:18px;flex-shrink:0;margin-top:2px}
+.mode b{font-weight:600;font-size:13px}.mode p{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
+.warn{display:flex;gap:10px;align-items:flex-start;background:#2a2533;border:1px solid #4a3a4a;border-radius:12px;padding:12px;font-size:12px;color:var(--pink2);line-height:1.45}
+.warn svg{width:16px;height:16px;flex-shrink:0}
+.site{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2b3a4f;font-size:13px}
+.toggle{width:34px;height:20px;border-radius:20px;background:#3a475b;position:relative;cursor:pointer;flex-shrink:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.on{background:var(--pink)}.toggle.on::after{left:17px}
+.companion-wrap{display:flex;align-items:flex-end;gap:6px}
+.bubble{background:var(--card2);border:1px solid var(--border);border-radius:14px 14px 4px 14px;padding:12px 14px;max-width:270px;font-size:13px;line-height:1.45;align-self:flex-start}
+.bubble .acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.bubble .who{font-size:11px;color:var(--pink);font-weight:600;margin-bottom:4px;letter-spacing:.04em}
+
+/* ---------- mascots ---------- */
+.mascot{width:92px;height:92px;flex-shrink:0}
+.mascot .eye{animation:blink 4.5s infinite;transform-origin:center;transform-box:fill-box}
+.mascot .tail{animation:wag 1.6s ease-in-out infinite;transform-origin:left center;transform-box:fill-box}
+.mascot.bounce{animation:bounce 2.8s ease-in-out infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes wag{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(14deg)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.reduce .mascot *,.reduce .mascot{animation:none!important}
+
+.placeholder{display:grid;place-items:center;text-align:center;min-height:300px;color:var(--muted);gap:10px}
+.placeholder svg{width:40px;height:40px;color:var(--pink)}
+.preview-note{position:fixed;bottom:14px;right:16px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--muted);z-index:5}
+.preview-note b{color:var(--pink)}
+.toast{position:fixed;bottom:56px;right:16px;background:var(--pink);color:#2a1a22;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13px;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;z-index:40}
+.toast.show{opacity:1;transform:none}
+
+@media (max-width:1250px){
+  .dash-top{grid-template-columns:1fr 1fr}
+  .dash-top>.tabcard{grid-column:1/-1}
+}
+@media (max-width:1150px){
+  .dash-bottom,.cal-row,.perf-row,.halves,.focus-grid,.skin-grid{grid-template-columns:1fr}
+  .kstack{grid-template-columns:repeat(3,1fr);grid-template-rows:auto}
+}
+@media (max-width:760px){
+  .dash-top{grid-template-columns:1fr}
+  .kstack{grid-template-columns:1fr}
+  .sidebar{width:68px}.sidebar .label,.sidebar .logo-text{display:none}
+  .nav .sub a{padding-left:10px}.nav .sub::before{display:none}
+  main{padding:18px 16px 60px}
+  .day{min-height:56px;padding:6px}
+  .donut{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="brand"><i data-lucide="sparkles" style="width:13px;height:13px"></i>DAYFLOW</div>
+    <div class="winbtns"><span><i data-lucide="minus" style="width:14px"></i></span><span><i data-lucide="square" style="width:12px"></i></span><span><i data-lucide="x" style="width:14px"></i></span></div>
+  </div>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="datecard" title="Today">
+        <div class="tile"><span>NOV</span><b>8</b></div>
+        <div class="logo-text"><b>Sunday</b><small>November 8, 2026</small></div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="side-foot">
+        <div class="ext-status" title="Chrome extension status"><span class="dot"></span><span class="label">Extension not connected</span></div>
+        <button id="logout" title="Log out"><i data-lucide="log-out"></i><span class="label">Log out</span></button>
+        <button id="collapse" title="Collapse sidebar"><i data-lucide="panel-left-close"></i><span class="label">Collapse</span></button>
+      </div>
+    </aside>
+    <main id="main"></main>
+  </div>
+</div>
+<div class="preview-note"><b>UI preview</b> · sample data only, nothing is saved</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= data ================= */
+const NAV=[
+ {id:"dashboard",i:"layout-dashboard",l:"Dashboard"},
+ {id:"habits",i:"repeat",l:"Habit Tracker"},
+ {group:"Categories",i:"shapes",items:[
+   {id:"selfcare",i:"scissors",l:"Self Care"},{id:"skincare",i:"droplets",l:"Skin Care"},
+   {id:"eat",i:"apple",l:"Eat Healthy"},{id:"focus",i:"timer",l:"Focus Mode"}]},
+ {id:"todo",i:"list-checks",l:"To-do List"},
+ {id:"calendar",i:"calendar-days",l:"Calendar"},
+ {id:"progress",i:"chart-line",l:"Progress & Analytics"},
+ {id:"settings",i:"settings",l:"Settings"}];
+const NAV_FLAT=NAV.flatMap(n=>n.items||[n]);
+const CATS=[["All Progress","layers"],["MVG","pen-tool"],["Exercise","dumbbell"],["Self Care","heart"],["Skin Care","droplets"],["Eat Healthy","apple"],["No Sugar","candy-off"]];
+const CAT_NAMES=CATS.slice(1).map(c=>c[0]);
+const CAT_ICON=Object.fromEntries(CATS);
+const CAT_COLORS={"MVG":"#F4B8CE","Exercise":"#8FC1F0","Self Care":"#93D6BE","Skin Care":"#F3D08A","Eat Healthy":"#F0A584","No Sugar":"#B9A4F0"};
+const META={"All Progress":{seed:.4,base:66},"MVG":{seed:1.2,base:70},"Exercise":{seed:2.3,base:56},"Self Care":{seed:4.4,base:74},"Skin Care":{seed:5.2,base:80},"Eat Healthy":{seed:.9,base:58},"No Sugar":{seed:3.1,base:68}};
+const DIM="#34465F";
+const WEEK_LABELS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const TODAY=new Date(2026,10,8);
+const QUOTES=["Consistency over perfection.","Progress over pressure.","Small steps still move you forward."];
+
+const state={authed:false,page:"dashboard",cat:"All Progress",catOpen:true,dashTab:"To-do",perfRange:"Week",range:"30",
+ calOffset:0,selDay:null,hidden:new Set(),focusMin:25,breakMin:5,mode:"normal",dismissed:new Set(),
+ habits:[
+  {n:"Work on a design project",c:"MVG",d:true},{n:"Practice a design skill",c:"MVG",d:false},
+  {n:"Walk for at least 20 minutes",c:"Exercise",d:true},{n:"Stretch",c:"Exercise",d:false},
+  {n:"Hair check",c:"Self Care",d:true},
+  {n:"Morning skincare routine",c:"Skin Care",d:true},{n:"Evening skincare routine",c:"Skin Care",d:false},
+  {n:"Drink 8 glasses of water",c:"Eat Healthy",d:false},{n:"Eat fruits & vegetables",c:"Eat Healthy",d:true},{n:"Stay within my calorie goal",c:"Eat Healthy",d:false},
+  {n:"No added sugar",c:"No Sugar",d:true}],
+ tasks:[
+  {n:"Send Christmas coloring book proofs",c:"MVG",due:"Today",p:"High",d:false},
+  {n:"Book dentist appointment",c:"Self Care",due:"Today",p:"Medium",d:false},
+  {n:"Draft December content plan",c:"MVG",due:"Nov 10",p:"Low",d:false},
+  {n:"Export KDP cover files",c:"MVG",due:"Nov 6",p:"High",d:true},
+  {n:"Post coloring page preview",c:"MVG",due:"Nov 5",p:"Medium",d:true},
+  {n:"Buy new toner",c:"Skin Care",due:"Nov 7",p:"Medium",d:true},
+  {n:"Plan weekly meal prep",c:"Eat Healthy",due:"Nov 3",p:"Low",d:true},
+  {n:"Renew gym pass",c:"Exercise",due:"Nov 4",p:"Medium",d:true},
+  {n:"Clear sweets from the pantry",c:"No Sugar",due:"Nov 6",p:"Low",d:true},
+  {n:"Order fruit delivery",c:"Eat Healthy",due:"Nov 7",p:"Low",d:true}],
+ selfcare:[
+  {n:"Hair Check",f:"Weekly",s:"Due in 2 days",d:false},{n:"Eyebrow Trim",f:"Every 2 weeks",s:"Due today",d:false},
+  {n:"Nail Cut",f:"Every 10 days",s:"Planned for yesterday",d:false},{n:"Nose Trim",f:"Weekly",s:"Due in 4 days",d:false},
+  {n:"Shave",f:"Custom",s:"",d:true}],
+ skin:{am:[{n:"Toner",d:true},{n:"Lotion",d:true},{n:"Myra E",d:false}],pm:[{n:"Toner",d:false},{n:"Lotion",d:false}]}};
+
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const ic=(n,s="")=>`<i data-lucide="${n}" ${s}></i>`;
+const avg=a=>Math.round(a.reduce((x,y)=>x+y,0)/a.length);
+const habit=n=>state.habits.find(h=>h.n===n);
+const isAll=()=>state.cat==="All Progress";
+const inCat=c=>isAll()||c===state.cat;
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),1900)}
+function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`}
+function gen(seed,n,base=62,amp=20,f=n<=8?.8:n<=31?.33:.14){return Array.from({length:n},(_,i)=>Math.max(10,Math.min(100,Math.round(base+amp*Math.sin(i*f+seed*3)+amp*.5*Math.sin(i*f*2.4+seed*5)))))}
+function todayPct(cat){const h=state.habits.filter(x=>cat==="All Progress"||x.c===cat);return h.length?Math.round(h.filter(x=>x.d).length/h.length*100):0}
+function series(cat,n){const m=META[cat];const s=gen(m.seed+n*.013,n,m.base);s[n-1]=todayPct(cat);return s}
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const TODAY_KEY=ymd(TODAY);
+function dayLabels(n){return Array.from({length:n},(_,i)=>{const d=new Date(TODAY);d.setDate(d.getDate()-(n-1-i));return d.toLocaleDateString("en-US",{month:"short",day:"numeric"})})}
+const fmtMin=m=>m<60?`${m}m`:`${Math.floor(m/60)}h${m%60?` ${m%60}m`:""}`;
+function hsh(s){let x=2166136261;for(const ch of s){x^=ch.charCodeAt(0);x=Math.imul(x,16777619)}return (x>>>0)/4294967295}
+function filtered(){return state.habits.filter(h=>inCat(h.c))}
+
+function ring(p,size=46,stroke=5,color="var(--pink)"){const r=(size-stroke)/2,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 ${size} ${size}" style="width:${size}px;height:${size}px"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#2f4058" stroke-width="${stroke}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p/100)}" transform="rotate(-90 ${size/2} ${size/2})"/><text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" fill="var(--text)" font-size="${size*.24}" font-weight="600" font-family="Inter">${p}%</text></svg>`}
+let sgId=0;
+function svgSpark(vals,w=90,h=28){const id="sg"+(++sgId),n=vals.length;
+ const P=vals.map((v,i)=>[+(i*(w-6)/(n-1)+3).toFixed(1),+(h-3-(v/100)*(h-6)).toFixed(1)]);
+ let d=`M${P[0][0]},${P[0][1]}`;for(let i=1;i<n;i++){const[x0,y0]=P[i-1],[x1,y1]=P[i],mx=((x0+x1)/2).toFixed(1);d+=` C${mx},${y0} ${mx},${y1} ${x1},${y1}`}
+ const L=P[n-1];
+ return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4B8CE" stop-opacity=".35"/><stop offset="1" stop-color="#F4B8CE" stop-opacity="0"/></linearGradient></defs><path d="${d} L${L[0]},${h} L${P[0][0]},${h} Z" fill="url(#${id})"/><path d="${d}" fill="none" stroke="#F4B8CE" stroke-width="1.8" stroke-linecap="round"/><circle cx="${L[0]}" cy="${L[1]}" r="2.6" fill="#F4B8CE"/></svg>`}
+
+/* ================= mascots ================= */
+/* Border Collie: charcoal and white, with a white blaze, semi-erect ears with folded tips, white chest and a white tail tip */
+const DOG=`<svg class="mascot bounce" viewBox="0 0 120 120" aria-label="Border Collie companion">
+ <g class="tail"><path d="M88 94 q20 -2 22 -24" stroke="#363C48" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M108.5 75 q1.5 -4 1.5 -7" stroke="#F7F8FB" stroke-width="8" fill="none" stroke-linecap="round"/></g>
+ <ellipse cx="62" cy="97" rx="30" ry="18" fill="#363C48" stroke="#58627A" stroke-width="1.4"/>
+ <ellipse cx="60" cy="96" rx="15" ry="15" fill="#F7F8FB"/>
+ <circle cx="50" cy="88" r="7" fill="#F7F8FB"/><circle cx="60" cy="90" r="8" fill="#F7F8FB"/><circle cx="70" cy="88" r="7" fill="#F7F8FB"/>
+ <ellipse cx="47" cy="112" rx="7.5" ry="4" fill="#F7F8FB"/><ellipse cx="73" cy="112" rx="7.5" ry="4" fill="#F7F8FB"/>
+ <rect x="41" y="77" width="38" height="7" rx="3.5" fill="#F4B8CE"/><circle cx="60" cy="87" r="4" fill="#F8D5E2" stroke="#D98CAB" stroke-width="1.2"/>
+ <path d="M33 44 L29 19 Q41 20 48 33 Z" fill="#363C48" stroke="#58627A" stroke-width="1.4" stroke-linejoin="round"/>
+ <path d="M87 44 L91 19 Q79 20 72 33 Z" fill="#363C48" stroke="#58627A" stroke-width="1.4" stroke-linejoin="round"/>
+ <path d="M29 19 Q35 17 39 22 L34 27 Z" fill="#2A2F39"/><path d="M91 19 Q85 17 81 22 L86 27 Z" fill="#2A2F39"/>
+ <path d="M35 39 L33 26 Q39 28 43 34 Z" fill="#E8B4C6" opacity=".75"/><path d="M85 39 L87 26 Q81 28 77 34 Z" fill="#E8B4C6" opacity=".75"/>
+ <ellipse cx="60" cy="57" rx="29" ry="26" fill="#363C48" stroke="#58627A" stroke-width="1.4"/>
+ <path d="M56.5 31.5 Q60 30 63.5 31.5 L65 51 Q78 57 76 70 Q72 81 60 81 Q48 81 44 70 Q42 57 55 51 Z" fill="#F7F8FB"/>
+ <g class="eye"><ellipse cx="46" cy="53" rx="5" ry="5.6" fill="#FFFFFF"/><circle cx="46.4" cy="53.6" r="3.7" fill="#6B4527"/><circle cx="46.4" cy="53.6" r="2.1" fill="#14161B"/><circle cx="47.6" cy="52.2" r="1.1" fill="#fff"/></g>
+ <g class="eye"><ellipse cx="74" cy="53" rx="5" ry="5.6" fill="#FFFFFF"/><circle cx="73.6" cy="53.6" r="3.7" fill="#6B4527"/><circle cx="73.6" cy="53.6" r="2.1" fill="#14161B"/><circle cx="74.8" cy="52.2" r="1.1" fill="#fff"/></g>
+ <ellipse cx="60" cy="65" rx="5.4" ry="3.9" fill="#1B1E24"/><ellipse cx="58.6" cy="63.9" rx="1.6" ry="1" fill="#5A606C"/>
+ <path d="M54 71 q6 6 12 0" stroke="#2A2E36" stroke-width="2" fill="none" stroke-linecap="round"/>
+ <path d="M57.6 73.2 q2.4 7 4.8 0 z" fill="#F29BB8"/>
+ <ellipse cx="48" cy="69" rx="4" ry="2.4" fill="#F4B8CE" opacity=".6"/><ellipse cx="72" cy="69" rx="4" ry="2.4" fill="#F4B8CE" opacity=".6"/>
+</svg>`;
+/* White Persian: round fluffy face with a cheek ruff, small low-set rounded ears, big round blue eyes, tiny flat-face nose, plume tail */
+const CAT=`<svg class="mascot" viewBox="0 0 120 120" aria-label="Persian cat companion">
+ <g class="tail"><path d="M86 102 q26 -2 23 -28 q-2 -9 -9 -7" stroke="#DCE1EA" stroke-width="16" fill="none" stroke-linecap="round"/><path d="M87 101 q22 -3 20 -26" stroke="#F4F6FA" stroke-width="9" fill="none" stroke-linecap="round"/></g>
+ <ellipse cx="60" cy="98" rx="31" ry="18" fill="#EEF1F6"/>
+ <circle cx="35" cy="105" r="8" fill="#EEF1F6"/><circle cx="47" cy="110" r="8" fill="#EEF1F6"/><circle cx="60" cy="112" r="8" fill="#EEF1F6"/><circle cx="73" cy="110" r="8" fill="#EEF1F6"/><circle cx="85" cy="105" r="8" fill="#EEF1F6"/>
+ <path d="M29 47 Q27 30 44 31 Q39 40 29 47 Z" fill="#F4F6FA" stroke="#D6DCE6" stroke-width="1"/>
+ <path d="M91 47 Q93 30 76 31 Q81 40 91 47 Z" fill="#F4F6FA" stroke="#D6DCE6" stroke-width="1"/>
+ <path d="M32 43 Q31 34 40 34 Q37 39 32 43 Z" fill="#F4B8CE"/><path d="M88 43 Q89 34 80 34 Q83 39 88 43 Z" fill="#F4B8CE"/>
+ <circle cx="44" cy="33" r="7" fill="#F4F6FA"/><circle cx="60" cy="30" r="8" fill="#F4F6FA"/><circle cx="76" cy="33" r="7" fill="#F4F6FA"/>
+ <circle cx="31" cy="62" r="10" fill="#E6EAF1"/><circle cx="34" cy="73" r="10" fill="#E6EAF1"/><circle cx="44" cy="81" r="10" fill="#E6EAF1"/><circle cx="60" cy="85" r="10" fill="#E6EAF1"/><circle cx="76" cy="81" r="10" fill="#E6EAF1"/><circle cx="86" cy="73" r="10" fill="#E6EAF1"/><circle cx="89" cy="62" r="10" fill="#E6EAF1"/>
+ <circle cx="60" cy="58" r="29" fill="#FAFBFD"/>
+ <path d="M38 50 q8 -5 15 0 M67 50 q7 -5 15 0" stroke="#DCE1EA" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+ <g class="eye"><circle cx="46" cy="58" r="7" fill="#8CC2EE" stroke="#C7D3E2" stroke-width=".8"/><circle cx="46" cy="58.6" r="4" fill="#1B2533"/><circle cx="48.2" cy="55.9" r="1.9" fill="#fff"/><circle cx="44.2" cy="60.6" r=".8" fill="#fff" opacity=".8"/></g>
+ <g class="eye"><circle cx="74" cy="58" r="7" fill="#8CC2EE" stroke="#C7D3E2" stroke-width=".8"/><circle cx="74" cy="58.6" r="4" fill="#1B2533"/><circle cx="76.2" cy="55.9" r="1.9" fill="#fff"/><circle cx="72.2" cy="60.6" r=".8" fill="#fff" opacity=".8"/></g>
+ <path d="M57.8 64.6 h4.4 l-2.2 2.6 z" fill="#E899B6"/>
+ <path d="M60 67.2 q-2.4 3 -5.4 1.6 M60 67.2 q2.4 3 5.4 1.6" stroke="#B7A5B0" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+ <path d="M28 63 h13 M29 68 h12 M79 63 h13 M79 68 h12" stroke="#CBD2DD" stroke-width="1" stroke-linecap="round"/>
+ <ellipse cx="40" cy="68" rx="4.2" ry="2.5" fill="#F4B8CE" opacity=".55"/><ellipse cx="80" cy="68" rx="4.2" ry="2.5" fill="#F4B8CE" opacity=".55"/>
+ <path d="M80 36 l10 -6 v13 z M80 36 l-2 -10 l12 4 z" fill="#F4B8CE"/><circle cx="81" cy="36" r="2.6" fill="#D98CAB"/>
+</svg>`;
+
+/* ================= shared UI ================= */
+function catDropdown(){const cur=state.cat;
+ const item=([c,i])=>`<button class="dd-item ${c===cur?"sel":""}" data-set="cat" data-val="${c}" role="option" aria-selected="${c===cur}"><span class="ii">${ic(i)}</span><span class="tx">${c}${c==="All Progress"?"<small>Aggregate of all categories</small>":""}</span><span class="pc">${todayPct(c)}%</span><span class="ck">${c===cur?ic("check"):""}</span></button>`;
+ return `<div class="dd"><button class="dd-btn" data-dd-toggle aria-haspopup="listbox" aria-expanded="false" title="Category"><span class="l">${ic(CAT_ICON[cur])}<span>${cur==="All Progress"?"All":cur}</span></span>${ic("chevron-down",'class="chev"')}</button>
+  <div class="dd-menu" role="listbox">${item(CATS[0])}<div class="dd-sep"></div><div class="dd-cap">CATEGORIES · TODAY</div>${CATS.slice(1).map(item).join("")}</div></div>`}
+function segSet(key,opts,fmt=o=>o){return `<div class="seg sm">${opts.map(o=>`<button class="${state[key]===o?"on":""}" data-set="${key}" data-val="${o}">${fmt(o)}</button>`).join("")}</div>`}
+function header(title,sub,right=""){return `<div class="topbar"><div><h1>${title}</h1><div class="sub">${sub}</div></div>${right}</div>`}
+
+/* ================= companion reminders ================= */
+const REMINDERS=[
+ {who:"cat",cats:["Skin Care","All Progress"],h:"Evening skincare routine",t:"Have you done your skin care tonight? It's a rest night, so just toner and lotion."},
+ {who:"dog",cats:["Eat Healthy","All Progress"],h:"Drink 8 glasses of water",t:"Have you drunk enough water today? A glass now would be a great start!"},
+ {who:"dog",cats:["Exercise","All Progress"],h:"Stretch",t:"Time to stretch a little! Even two minutes counts."},
+ {who:"dog",cats:["MVG","All Progress"],h:"Practice a design skill",t:"How's your creative project going? A few minutes of skill practice today?"},
+ {who:"cat",cats:["Self Care"],h:null,t:"When was your last eyebrow trim? It's due today."},
+ {who:"cat",cats:["No Sugar"],h:null,t:"Another day with no added sugar. Fruit doesn't count, so enjoy it!"}];
+function currentReminder(){return REMINDERS.find(r=>r.cats.includes(state.cat)&&!state.dismissed.has(r.t)&&(!r.h||!habit(r.h).d))}
+
+/* ================= chart helpers ================= */
+const charts=[];
+if(window.Chart){
+ Object.assign(Chart.defaults.font,{family:"Inter, system-ui, sans-serif",size:11});
+ Chart.defaults.color="#AAB4C3";Chart.defaults.borderColor="#2b3a4f";
+ Chart.defaults.plugins.legend.display=false;
+ Object.assign(Chart.defaults.plugins.tooltip,{backgroundColor:"#0D121B",borderColor:"#354154",borderWidth:1,padding:10,cornerRadius:10,titleColor:"#F5F6FA",bodyColor:"#C9D1DD",boxPadding:4,usePointStyle:true});
+ Chart.defaults.animation.duration=550;
+}
+function mk(id,cfg){const el=document.getElementById(id);if(!el)return;
+ if(!window.Chart){el.parentElement.innerHTML='<div class="muted" style="display:grid;place-items:center;height:100%;font-size:12px">Charts need an internet connection in this preview.</div>';return}
+ charts.push(new Chart(el,cfg))}
+const yPct=()=>({min:0,max:100,ticks:{stepSize:25,callback:v=>v+"%",padding:8},grid:{color:"#2b3a4f",drawTicks:false},border:{display:false,dash:[4,4]}});
+const xPlain=(max=8)=>({grid:{display:false},border:{display:false},ticks:{maxTicksLimit:max,maxRotation:0,padding:6}});
+const areaGrad=color=>c=>{const{ctx,chartArea}=c.chart;if(!chartArea)return hexA(color,.15);const g=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);g.addColorStop(0,hexA(color,.38));g.addColorStop(1,hexA(color,0));return g};
+const pinPlugin=(idx,color)=>({id:"pin",afterDatasetsDraw(chart){
+ const pt=chart.getDatasetMeta(0).data[idx];if(!pt)return;const v=chart.data.datasets[0].data[idx];const{ctx,chartArea}=chart;
+ ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle=hexA(color,.45);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pt.x,pt.y+7);ctx.lineTo(pt.x,chartArea.bottom);ctx.stroke();ctx.setLineDash([]);
+ const txt=v+"%";ctx.font="600 12px Inter, sans-serif";const w=ctx.measureText(txt).width+18,h=22;
+ const x=Math.max(chartArea.left,Math.min(chartArea.right-w+8,pt.x-w/2)),y=pt.y-h-10;
+ ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,11);ctx.fill();
+ ctx.fillStyle="#1d1620";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(txt,x+w/2,y+h/2+.5);ctx.restore()}});
+function lineCfg(labels,main,comp,pin,maxTicks=8){const color=main.color||"#F4B8CE";
+ const ds=[{label:main.label,data:main.data,borderColor:color,borderWidth:2.5,tension:.45,fill:true,backgroundColor:areaGrad(color),
+   pointRadius:c=>c.dataIndex===pin?5:0,pointHoverRadius:5,pointBackgroundColor:color,pointBorderColor:"#111722",pointBorderWidth:2}];
+ if(comp)ds.push({label:comp.label,data:comp.data,borderColor:"#8A97AB",borderWidth:1.6,tension:.45,fill:false,pointRadius:0,pointHoverRadius:4,pointBackgroundColor:"#8A97AB"});
+ return{type:"line",data:{labels,datasets:ds},
+ options:{maintainAspectRatio:false,layout:{padding:{top:30,right:10}},interaction:{mode:"index",intersect:false},
+  scales:{y:yPct(),x:xPlain(maxTicks)},plugins:{tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}%`}}}},
+ plugins:[pinPlugin(pin,color)]}}
+function multiLineCfg(labels,sets,maxTicks=8){const n=labels.length;return{type:"line",
+ data:{labels,datasets:sets.map(s=>({label:s.label,data:s.data,hidden:s.hidden,borderColor:s.color,backgroundColor:s.color,borderWidth:2.2,tension:.45,fill:false,
+   pointRadius:c=>c.dataIndex===n-1?3.5:0,pointHoverRadius:5,pointBorderColor:"#111722",pointBorderWidth:1.5}))},
+ options:{maintainAspectRatio:false,layout:{padding:{top:10,right:10}},interaction:{mode:"index",intersect:false},
+  scales:{y:yPct(),x:xPlain(maxTicks)},plugins:{tooltip:{itemSort:(a,b)=>b.parsed.y-a.parsed.y,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}%`}}}}}}
+function donutCfg(labels,data,colors,cutout="74%"){return{type:"doughnut",data:{labels,datasets:[{data,backgroundColor:colors,borderColor:"#202D3D",borderWidth:3,hoverOffset:4,borderRadius:4}]},
+ options:{maintainAspectRatio:false,cutout}}}
+const FOCUS_WEEKS={"MVG":[6,7,5.5,8],"Exercise":[1,1.5,1,2],"Self Care":[.5,.5,1,.5],"Skin Care":[0,.5,0,.5],"Eat Healthy":[.5,0,.5,1]};
+
+/* ================= calendar data ================= */
+function dayData(key){
+ if(key>TODAY_KEY)return null;
+ return CAT_NAMES.map(c=>{const hs=state.habits.filter(h=>h.c===c),due=hs.length||1;
+  if(key===TODAY_KEY)return{c,due,done:hs.filter(h=>h.d).length};
+  const f=hsh(key+c);const done=f<META[c].base/100-.08?Math.max(1,Math.min(due,Math.round(due*(.45+f)))):0;
+  return{c,due,done}})}
+
+/* ================= login ================= */
+function loginView(){return `<div class="login-wrap"><div class="login-card">
+ <div class="login-pets">${DOG}${CAT}</div>
+ <div class="logo"><div class="logo-mark">${ic("sunrise")}</div><div class="logo-text"><b>DAYFLOW</b></div></div>
+ <h1>Welcome back</h1><div class="sub">Log in to pick up where you left off.</div>
+ <form id="loginForm" autocomplete="on" novalidate>
+  <label class="lb" for="em">Email</label>
+  <div class="inp">${ic("mail")}<input id="em" type="email" placeholder="you@example.com" autocomplete="username"></div>
+  <label class="lb" for="pw">Password</label>
+  <div class="inp">${ic("lock")}<input id="pw" type="password" placeholder="Your password" autocomplete="current-password"><button type="button" data-eye title="Show password">${ic("eye")}</button></div>
+  <div class="login-row"><label class="chk"><input type="checkbox" checked> Keep me logged in</label><button type="button" class="link" data-soon="Password reset">Forgot password?</button></div>
+  <button class="btn block" type="submit">${ic("log-in")}Log in</button>
+ </form>
+ <div class="login-foot">New to DAYFLOW? <button class="link" data-soon="Sign up">Create account</button></div>
+</div></div>`}
+
+/* ================= pages ================= */
+const pages={
+dashboard(){
+ const hs=filtered(),done=hs.filter(h=>h.d).length,cat=state.cat,all=isAll();
+ const tasks=state.tasks.filter(t=>inCat(t.c)),tDone=tasks.filter(t=>t.d).length;
+ const r=currentReminder();
+ const q=QUOTES[0];
+ const tabs=["To-do","Self Care","Skin Care","Eat Healthy"];
+ const openTasks=state.tasks.filter(t=>inCat(t.c)&&(!t.d||t.due==="Today"));
+ const eatList=state.habits.filter(h=>h.c==="Eat Healthy");
+ const counts={"To-do":openTasks.filter(t=>!t.d).length,"Self Care":state.selfcare.filter(s=>!s.d).length,"Skin Care":[...state.skin.am,...state.skin.pm].filter(s=>!s.d).length,"Eat Healthy":eatList.filter(h=>!h.d).length};
+ let body="";
+ if(state.dashTab==="To-do"){
+  body=openTasks.map(t=>`<div class="check ${t.d?"done":""}" data-task="${state.tasks.indexOf(t)}"><div class="box">${ic("check")}</div><div class="lbl"><b>${t.n}</b><small>${t.due} · ${t.c}</small></div><span class="tag ${t.p==="High"?"high":""}">${t.p}</span></div>`).join("")||`<p class="muted" style="padding:14px 4px">Nothing left to do${all?"":` in ${cat}`}. Enjoy the breathing room.</p>`;
+ }else if(state.dashTab==="Self Care"){
+  body=state.selfcare.map((s,i)=>`<div class="check ${s.d?"done":""}" data-sc="${i}"><div class="box">${ic("check")}</div><div class="lbl"><b>${s.n}</b><small>${s.d?"Done today":s.s} · ${s.f}</small></div>${!s.d&&s.s==="Due today"?`<span class="tag pink">Today</span>`:""}</div>`).join("");
+ }else if(state.dashTab==="Skin Care"){
+  const row=(p,k,i)=>`<div class="check ${p.d?"done":""}" data-skin="${k}-${i}"><div class="box">${ic("check")}</div><div class="lbl"><b>${p.n}</b></div></div>`;
+  body=`<div class="sec-lab">${ic("sun")}MORNING</div>${state.skin.am.map((p,i)=>row(p,"am",i)).join("")}
+   <div class="sec-lab" style="margin-top:12px">${ic("moon")}EVENING · <span class="tag pink" style="font-size:10px">Rest night</span></div>${state.skin.pm.map((p,i)=>row(p,"pm",i)).join("")}`;
+ }else{
+  body=eatList.map(h=>`<div class="check ${h.d?"done":""}" data-h="${state.habits.indexOf(h)}"><div class="box">${ic("check")}</div><div class="lbl"><b>${h.n}</b></div></div>`).join("");
+ }
+ const kv=todayPct(cat);
+ return `<div class="topbar hero"><div class="hero-head"><div class="greet">Good morning, Norleen</div><div class="motto"><q>${q}</q></div></div>
+  <div class="hdr-actions"><button class="icon-btn" title="Notifications">${ic("bell")}<span class="badge"></span></button><button class="icon-btn" title="Companions">${ic("message-circle-heart")}</button><button class="btn" data-go="focus">${ic("timer")}Focus mode</button>${catDropdown()}</div></div>
+ <div class="grid" style="gap:16px">
+  <div class="grid dash-top">
+   <div class="card tabcard"><h3 style="margin-bottom:12px"><span class="t">${ic("list-checks")}Today</span><button class="btn sm" data-go="todo" title="Add task">${ic("plus")}Add task</button></h3>
+    <div class="tabs">${tabs.map(t=>`<button class="${state.dashTab===t?"on":""}" data-set="dashTab" data-val="${t}">${t}<span class="cnt">${counts[t]}</span></button>`).join("")}</div>
+    <div class="scroll" style="max-height:330px">${body}</div></div>
+   <div class="card rem"><h3><span class="t">${ic("bell-ring")}Reminder</span>${r?`<span class="tag">${r.cats[0]}</span>`:""}</h3>
+    ${r?`<div class="pet">${r.who==="dog"?DOG:CAT}</div><div class="who">${r.who==="dog"?"LEI · BORDER COLLIE":"TOBI · PERSIAN"}</div><div class="msg">${r.t}</div>
+     <div class="acts"><button class="btn sm" data-r="done">${ic("check")}Done</button><button class="btn ghost sm" data-r="later">${ic("clock")}Later</button><button class="btn ghost sm" data-r="dismiss">Dismiss</button></div>`
+    :`<div class="pet">${DOG}</div><div class="who">LEI · BORDER COLLIE</div><div class="msg">All caught up${all?"":` in ${cat}`}. Look at you making progress!</div>`}</div>
+   <div class="card"><h3><span class="t">${ic("repeat")}Habits</span><span class="muted" style="font-size:12px;font-weight:400">${done}/${hs.length} today</span></h3>
+    <div class="scroll" style="margin-top:6px">${hs.map(h=>`<div class="check ${h.d?"done":""}" data-h="${state.habits.indexOf(h)}"><div class="box">${ic("check")}</div><div class="lbl"><b>${h.n}</b></div><span class="cdot" style="background:${CAT_COLORS[h.c]}" title="${h.c}"></span></div>`).join("")||`<p class="muted" style="padding:14px 4px">No habits scheduled today.</p>`}</div></div>
+  </div>
+  <div class="grid dash-bottom">
+   <div class="card"><h3><span class="t">${ic("activity")}Habit performance</span>${segSet("perfRange",["Week","Month"],o=>o==="Week"?"Weekly":"Monthly")}</h3>
+    <div class="legend" style="margin-top:12px">${all?CAT_NAMES.map(c=>`<button class="lgchip ${state.hidden.has(c)?"off":""}" data-line="${c}" title="Show or hide ${c}"><i style="background:${CAT_COLORS[c]}"></i>${c}</button>`).join(""):`<span><i style="background:${CAT_COLORS[cat]}"></i>${cat}</span>`}</div>
+    <div class="chart-box"><canvas id="perf"></canvas></div></div>
+   <div class="kstack">
+    <div class="card kpi hl"><div class="kpi-top"><span class="lab">${ic("circle-check")}Habit completion</span><span class="tag pink">${ic("flame")}4-day streak</span></div>
+     <div class="big">${kv}%</div><div class="note">${done} of ${hs.length} habits done today</div><div class="bar"><i style="width:${kv}%"></i></div></div>
+    <div class="card kpi"><div class="kpi-top"><span class="lab">${ic("list-checks")}Tasks completed</span><span class="muted" style="font-size:12px">This week</span></div>
+     <div class="big">${tDone}<small>/ ${tasks.length}</small></div><div class="segbar"><i style="flex:${tDone||.001}"></i><i class="rest" style="flex:${(tasks.length-tDone)||.001}"></i></div></div>
+    <div class="card kpi dash"><div class="kpi-top"><span class="lab">${ic("timer")}Focus time</span><span class="chip-up">${ic("arrow-up")}12%</span></div>
+     <div class="kpi-row"><div><div class="big">1h 50m</div><div class="note">Today · 3 sessions</div></div>${svgSpark([40,55,35,60,52,70,64],90,32)}</div></div>
+   </div>
+  </div>
+ </div>`},
+
+progress(){
+ const n=+state.range,cat=state.cat,s=series(cat,n),all=isAll();
+ const fmin=n*31,comp=Math.round(n*.75),intr=Math.max(1,Math.round(n*.1));
+ const base=new Date(TODAY.getFullYear(),TODAY.getMonth()+state.calOffset,1);
+ const monthName=base.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+ const lead=(base.getDay()+6)%7,dim=new Date(base.getFullYear(),base.getMonth()+1,0).getDate();
+ const sel=state.selDay||TODAY_KEY;
+ let cells=WEEK_LABELS.map(w=>`<div class="wd">${w}</div>`).join("")+Array.from({length:lead},()=>`<div class="day blank"></div>`).join("");
+ let active=0;
+ for(let d=1;d<=dim;d++){const key=ymd(new Date(base.getFullYear(),base.getMonth(),d));const dd=dayData(key);
+  if(!dd){cells+=`<div class="day future"><div class="n">${d}</div></div>`;continue}
+  const marks=dd.filter(x=>x.done>0&&inCat(x.c));if(marks.length)active++;
+  const perfect=all?dd.every(x=>x.done===x.due):(marks[0]&&marks[0].done===marks[0].due);
+  cells+=`<button class="day ${key===TODAY_KEY?"today":""} ${key===sel?"sel":""}" data-day="${key}" title="${key}"><div class="n">${d}${perfect?ic("sparkles"):""}</div><div class="dots">${marks.map(m=>`<i style="background:${CAT_COLORS[m.c]}" title="${m.c}"></i>`).join("")}</div></button>`}
+ const selD=dayData(sel)||[],selRows=selD.filter(x=>inCat(x.c));
+ const selDone=selRows.reduce((a,x)=>a+x.done,0),selDue=selRows.reduce((a,x)=>a+x.due,0);
+ const selDate=new Date(sel+"T00:00");
+ return header("Progress & Analytics","Every mark is a category you showed up for. Unscheduled days are never counted as missed.",
+  `<div class="hdr-actions">${catDropdown()}</div>`)+`
+ <div class="grid" style="gap:18px">
+  <div class="grid cal-row">
+   <div class="card"><div class="cal-head"><div class="mon"><button class="icon-btn sm" data-cal="-1" title="Previous month">${ic("chevron-left")}</button><b>${monthName}</b><button class="icon-btn sm" data-cal="1" ${state.calOffset>=0?"disabled":""} title="Next month">${ic("chevron-right")}</button></div>
+     <span class="muted" style="font-size:13px">${active} active days${all?"":` in ${cat}`}</span></div>
+    <div class="cal">${cells}</div>
+    <div class="cal-legend">${CAT_NAMES.filter(inCat).map(c=>`<span><i style="background:${CAT_COLORS[c]}"></i>${c}</span>`).join("")}<span>${ic("sparkles",'style="width:12px;height:12px;color:var(--pink)"')}Every habit done</span></div></div>
+   <div class="card"><h3><span class="t">${ic("calendar-check")}${selDate.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</span>${sel===TODAY_KEY?`<span class="tag pink">Today</span>`:""}</h3>
+    <div style="display:flex;align-items:center;gap:14px;margin:16px 0 6px">${ring(selDue?Math.round(selDone/selDue*100):0,64,6)}<div><div style="font-size:20px;font-weight:600">${selDone} of ${selDue}</div><div class="muted" style="font-size:12px">scheduled habits done</div></div></div>
+    ${selRows.map(x=>`<div class="drow"><span class="cdot" style="background:${CAT_COLORS[x.c]}"></span><div class="tx"><b>${x.c}</b><div class="bar"><i style="width:${x.done/x.due*100}%;background:${CAT_COLORS[x.c]}"></i></div></div><span class="val">${x.done}/${x.due}</span></div>`).join("")}
+    <div class="drow"><span class="cdot" style="background:var(--slate)"></span><div class="tx"><b>Focus time</b></div><span class="val">${fmtMin(Math.round(20+hsh(sel+"f")*100))}</span></div></div>
+  </div>
+  <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px"><h2>Trends</h2>${segSet("range",["7","30","90"],o=>o+"d")}</div>
+  <div class="grid stats">
+   <div class="card stat"><div class="k">${ic("percent")}Avg completion</div><div class="v">${avg(s)}%</div><div class="bar"><i style="width:${avg(s)}%"></i></div></div>
+   <div class="card stat"><div class="k">${ic("trophy")}Best day</div><div class="v">${Math.max(...s)}%</div></div>
+   <div class="card stat"><div class="k">${ic("flame")}Current streak</div><div class="v">4 <small>days</small></div></div>
+   <div class="card stat"><div class="k">${ic("timer")}Focus time</div><div class="v">${fmtMin(fmin)}</div></div>
+   <div class="card stat"><div class="k">${ic("circle-check")}Sessions</div><div class="v">${comp} <small>completed</small></div></div>
+  </div>
+  <div class="grid perf-row">
+   <div class="card"><h3><span class="t">${ic("activity")}Completion trend</span><span class="legend"><span><i style="background:${all?"var(--pink)":CAT_COLORS[cat]}"></i>${cat}</span><span><i style="background:var(--slate)"></i>${all?"Previous period":"All Progress"}</span></span></h3>
+    <div class="chart-box sm"><canvas id="trend"></canvas></div></div>
+   <div class="card"><h3><span class="t">${ic("circle-dot")}Focus sessions</span><span class="muted" style="font-size:12px;font-weight:400">Last ${n} days</span></h3>
+    <div style="position:relative;height:170px;margin-top:14px"><canvas id="sessions"></canvas><div class="center"><div><b>${Math.round(comp/(comp+intr)*100)}%</b><small>completed</small></div></div></div>
+    <div class="lg-list" style="margin-top:12px"><div><span><i style="background:#F4B8CE"></i>Completed</span><b style="font-weight:500">${comp}</b></div><div><span><i style="background:#5E7391"></i>Interrupted (strict exit)</span><b style="font-weight:500">${intr}</b></div></div></div>
+  </div>
+  <div class="grid halves">
+   <div class="card"><h3><span class="t">${ic("chart-bar")}Category comparison</span><span class="muted" style="font-size:12px;font-weight:400">Avg completion</span></h3><div class="chart-box sm"><canvas id="compare"></canvas></div></div>
+   <div class="card"><h3><span class="t">${ic("timer")}Focus hours by category</span><span class="legend">${Object.keys(FOCUS_WEEKS).map(c=>`<span><i style="background:${inCat(c)?CAT_COLORS[c]:DIM}"></i>${c}</span>`).join("")}</span></h3><div class="chart-box sm"><canvas id="focusStack"></canvas></div></div>
+  </div>
+ </div>`},
+
+habits(){
+ const days=["Mon 2","Tue 3","Wed 4","Thu 5","Fri 6","Sat 7","Sun 8"];
+ // [habit, category, schedule, Mon–Sat (1 done · 0 not done · -1 unscheduled), today when not on today's list, streak carried from earlier weeks]
+ const rows=[
+  ["Work on a design project","MVG","Daily",[1,1,0,1,1,1],null,0],
+  ["Practice a design skill","MVG","Daily",[1,0,1,1,0,1],null,0],
+  ["Create or plan content","MVG","Mon · Wed · Fri",[1,-1,1,-1,1,-1],-1,3],
+  ["Workout","Exercise","3× per week",[1,0,1,0,0,1],0,0],
+  ["Walk for at least 20 minutes","Exercise","Daily",[1,1,1,0,1,1],null,0],
+  ["Stretch","Exercise","Daily",[0,1,1,1,0,1],null,0],
+  ["Hair check","Self Care","Weekly · Sundays",[-1,-1,-1,-1,-1,-1],null,5],
+  ["Morning skincare routine","Skin Care","Daily",[1,1,1,1,1,1],null,6],
+  ["Evening skincare routine","Skin Care","Daily",[1,1,0,1,1,1],null,0],
+  ["Drink 8 glasses of water","Eat Healthy","Daily",[1,0,1,1,0,1],null,0],
+  ["Eat fruits & vegetables","Eat Healthy","Daily",[1,1,0,1,1,1],null,0],
+  ["Stay within my calorie goal","Eat Healthy","Daily",[0,1,1,0,1,1],null,0],
+  ["No added sugar","No Sugar","Daily",[1,1,1,1,1,1],null,8]];
+ const todayOf=r=>{const h=habit(r[0]);return h?(h.d?1:0):r[4]};
+ const streakOf=r=>{let s=todayOf(r)===1?1:0;for(let i=5;i>=0;i--){if(r[3][i]===-1)continue;if(r[3][i]===1)s++;else return s}return s+r[5]};
+ const groups=CAT_NAMES.filter(inCat).map(c=>({c,rows:rows.filter(r=>r[1]===c)})).filter(g=>g.rows.length);
+ const cell=(x,hIdx)=>`<span class="cell ${x===1?"on":x===-1?"off":""}" ${hIdx>=0?`data-h="${hIdx}" title="Tap to check off today"`:""}>${x===1?ic("check"):""}</span>`;
+ return header("Habit Tracker","Week of Nov 2 – 8 · dashed cells are unscheduled and never count as missed",`<div class="hdr-actions">${catDropdown()}<button class="btn">${ic("plus")}New habit</button></div>`)+`
+ <div class="grid stats" style="margin-bottom:16px">
+  <div class="card stat"><div class="k">${ic("percent")}Week completion</div><div class="v">${avg(series(state.cat,7))}%</div><div class="bar"><i style="width:${avg(series(state.cat,7))}%"></i></div></div>
+  <div class="card stat"><div class="k">${ic("flame")}Best streak</div><div class="v">12 <small>days</small></div></div>
+  <div class="card stat"><div class="k">${ic("target")}Weekly targets met</div><div class="v">5<small> / 7</small></div></div>
+  <div class="card stat"><div class="k">${ic("archive")}Archived</div><div class="v">2 <small>history kept</small></div></div></div>
+ <div class="card" style="overflow:auto"><table><thead><tr><th>Habit</th>${days.map((d,i)=>`<th style="${i===6?"color:var(--pink)":""}">${d}</th>`).join("")}<th>Streak</th><th>8-week trend</th></tr></thead><tbody>
+ ${groups.map(g=>{const due=state.habits.filter(h=>h.c===g.c);
+   return `<tr class="grp-row"><td colspan="10"><span><span class="cdot" style="background:${CAT_COLORS[g.c]}"></span>${ic(CAT_ICON[g.c])}<b>${g.c}</b><span class="muted">${g.rows.length} habit${g.rows.length>1?"s":""} · ${due.filter(h=>h.d).length}/${due.length} done today</span></span></td></tr>`
+   +g.rows.map((r,ri)=>`<tr><td class="hname"><b>${r[0]}</b><small>${r[2]}</small></td>${r[3].map(x=>`<td>${cell(x,-1)}</td>`).join("")}<td>${cell(todayOf(r),state.habits.indexOf(habit(r[0])))}</td><td><span class="tag pink">${ic("flame")}${streakOf(r)}</span></td><td><div style="display:flex;justify-content:center">${svgSpark(gen(META[g.c].seed+ri*.7,8,66,18),84,26)}</div></td></tr>`).join("")}).join("")}
+ </tbody></table></div>`},
+
+todo(){
+ return header("To-do List","One-time tasks, separate from your recurring habits",`<div class="hdr-actions"><div class="search">${ic("search")}<input placeholder="Search tasks…"></div><button class="btn">${ic("plus")}Add task</button></div>`)+`
+ <div class="seg" style="display:inline-flex;margin-bottom:16px"><button class="on">All Tasks</button><button>Today</button><button>Upcoming</button><button>Overdue</button><button>Completed</button></div>
+ <div class="card">${state.tasks.map((t,i)=>`<div class="check ${t.d?"done":""}" data-task="${i}"><div class="box">${ic("check")}</div><div class="lbl"><b>${t.n}</b><small>${t.due} · ${t.c}</small></div><span class="tag ${t.p==="High"?"high":""}">${t.p}</span></div>`).join("")}</div>`},
+
+focus(){
+ const modes=[["normal","play-circle","Normal","Pause or end anytime. Sites unblock when the session ends."],["strict","lock","Strict","No pausing. Settings lock. Emergency exit needs confirmation and is recorded."],["scheduled","calendar-clock","Scheduled","Blocks automatically on set days and times. Chrome must be open."]];
+ return `<div class="reduce">`+header("Focus Mode","Companion animations pause while a session is running")+`
+ <div class="grid focus-grid">
+  <div class="card"><h3><span class="t">${ic("sliders-horizontal")}Session setup</span></h3><div style="margin-top:14px">
+   <div class="field"><label>Category</label><select class="select"><option>MVG</option><option>Exercise</option><option>Self Care</option></select></div>
+   <div class="field"><label>Related task (optional)</label><select class="select"><option>Send Christmas coloring book proofs</option><option>None</option></select></div>
+   <div class="field"><label>Focus duration</label><div class="chips">${[15,25,45,60].map(m=>`<button class="chip ${state.focusMin===m?"on":""}" data-fm="${m}">${m}m</button>`).join("")}<button class="chip">Custom</button></div></div>
+   <div class="field"><label>Break</label><div class="chips">${[5,10,15].map(m=>`<button class="chip ${state.breakMin===m?"on":""}" data-bm="${m}">${m}m</button>`).join("")}<button class="chip">Custom</button></div></div>
+   <div class="field"><label>Profile</label><div class="chips"><button class="chip on">Deep Work</button><button class="chip">Creative</button><button class="chip">Learning</button><button class="chip">+ Custom</button></div></div></div></div>
+  <div class="card"><div class="timer"><div style="position:relative;display:grid;place-items:center">
+    <svg class="ringbig" viewBox="0 0 260 260"><circle cx="130" cy="130" r="116" fill="none" stroke="#2b3a4f" stroke-width="10"/><circle cx="130" cy="130" r="116" fill="none" stroke="var(--pink)" stroke-width="10" stroke-linecap="round" stroke-dasharray="729" stroke-dashoffset="0" transform="rotate(-90 130 130)"/></svg>
+    <div style="position:absolute;text-align:center"><div class="time">${String(state.focusMin).padStart(2,"0")}:00</div><div class="muted" style="margin-top:4px">Deep Work · ${state.mode[0].toUpperCase()+state.mode.slice(1)}</div></div></div>
+    <div style="display:flex;gap:10px;margin-top:20px"><button class="btn" id="startFocus">${ic("play")}Start focus</button><button class="btn ghost">${ic("coffee")}Break ${state.breakMin}m</button></div></div>
+   <div style="margin-top:8px">${modes.map(([k,i,t,d])=>`<div class="mode ${state.mode===k?"on":""}" data-mode="${k}">${ic(i)}<div><b>${t}</b><p>${d}</p></div></div>`).join("")}</div>
+   ${state.mode==="strict"?`<div class="warn">${ic("shield-alert")}<span>Strict Mode isn't tamper-proof: disabling or uninstalling the Chrome extension removes the blocking.</span></div>`:""}</div>
+  <div class="card"><h3><span class="t">${ic("shield-ban")}Blocked sites</span><span class="tag">Deep Work</span></h3>
+   <div class="warn" style="margin:14px 0;background:#232b38;border-color:var(--border);color:var(--muted)">${ic("plug-zap")}<span>Blocking: <b style="color:var(--text)">Not active</b>. Install and connect the DAYFLOW Chrome extension so it can confirm blocking.</span></div>
+   ${["facebook.com","instagram.com","tiktok.com","youtube.com","reddit.com","x.com"].map((s,i)=>`<div class="site"><span>${s} <span class="muted" style="font-size:11px">+ subdomains</span></span><span class="toggle ${i!==3?"on":""}"></span></div>`).join("")}
+   <div style="display:flex;gap:8px;margin-top:14px"><input class="select" placeholder="Add a domain…"><button class="btn sm">${ic("plus")}</button></div>
+   <div class="muted" style="font-size:12px;margin-top:14px">Allowed exception: <span style="color:var(--pink)">youtube.com/@maevgraphics</span></div></div>
+ </div></div>`},
+
+skincare(){
+ const list=a=>a.map(([n,s,d])=>`<div class="check ${d?"done":""}"><div class="box">${ic("check")}</div><div class="lbl"><b>${n}</b></div><span class="tag">${s}</span></div>`).join("");
+ const cal=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>[d,["Tretinoin","Rest","Glycolic","Tretinoin","Rest","Glycolic","Rest"][i]]);
+ return header("Skin Care","Your routine, your schedule. Skipping a night is not a failure.",`<button class="btn">${ic("plus")}Add product</button>`)+`
+ <div class="grid skin-grid">
+  <div class="card"><h3><span class="t">${ic("sun")}Morning</span><span class="muted" style="font-size:12px;font-weight:400">2/3</span></h3><div style="margin-top:6px">${list([["Toner","Daily",true],["Lotion","Daily",true],["Myra E","Daily",false]])}</div></div>
+  <div class="card"><h3><span class="t">${ic("moon")}Evening · Sunday</span><span class="muted" style="font-size:12px;font-weight:400">Rest night</span></h3><div style="margin-top:6px">${list([["Toner","Daily",false],["Lotion","Daily",false]])}
+   <div class="check" style="opacity:.6"><div class="box" style="border-style:dashed"></div><div class="lbl"><b>No active tonight (rest night)</b></div><span class="tag pink">Rest</span></div></div></div>
+  <div class="card"><div class="companion-wrap" style="justify-content:flex-end"><div class="bubble"><div class="who">TOBI · PERSIAN</div>Your evening routine is waiting! Tonight's a rest night, so just toner and lotion.<div class="acts"><button class="btn sm" data-r="done">${ic("check")}Done</button><button class="btn ghost sm" data-r="later">Later</button><button class="btn ghost sm" data-r="dismiss">Dismiss</button></div></div>${CAT}</div></div>
+ </div>
+ <div class="card" style="margin-top:16px"><h3><span class="t">${ic("calendar-range")}Active schedule</span><span class="muted" style="font-size:12px;font-weight:400">Glycolic Acid and Tretinoin are never on the same night</span></h3>
+  <div class="grid" style="grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-top:14px">${cal.map(([d,a],i)=>`<div style="background:${a==="Rest"?"#26354A":"var(--pink-soft)"};border:1px solid ${i===6?"var(--pink)":"var(--border)"};border-radius:12px;padding:12px 4px;text-align:center"><div class="muted" style="font-size:12px">${d}</div><div style="margin-top:6px;font-weight:600;font-size:13px;color:${a==="Rest"?"var(--muted)":"var(--pink)"}">${a}</div></div>`).join("")}</div>
+  <p class="muted" style="font-size:12px;margin-top:14px">DAYFLOW doesn't prescribe a schedule. Set these to match your dermatologist's guidance.</p></div>`},
+};
+function placeholder(id){const n=NAV_FLAT.find(x=>x.id===id);return header(n.l,"Not mocked in this preview")+`<div class="card placeholder"><div>${ic(n.i)}</div><div style="max-width:420px">This screen will follow the same cards, charts and controls. Tell me if there's anything specific you want to see here before the full build.</div></div>`}
+
+/* ================= chart mounting ================= */
+const mounts={
+ dashboard(){
+  const cat=state.cat,wk=state.perfRange==="Week",n=wk?7:30,labels=wk?WEEK_LABELS:dayLabels(30);
+  if(isAll())mk("perf",multiLineCfg(labels,CAT_NAMES.map(c=>({label:c,data:series(c,n),color:CAT_COLORS[c],hidden:state.hidden.has(c)})),wk?7:6));
+  else mk("perf",lineCfg(labels,{label:cat,data:series(cat,n),color:CAT_COLORS[cat]},null,n-1,wk?7:6));
+ },
+ progress(){
+  const n=+state.range,cat=state.cat,all=isAll(),labels=dayLabels(n);
+  mk("trend",lineCfg(labels,{label:cat,data:series(cat,n),color:all?"#F4B8CE":CAT_COLORS[cat]},{label:all?"Previous period":"All Progress",data:all?gen(1.7,n,60):series("All Progress",n)},n-1,n>30?8:7));
+  mk("compare",{type:"bar",data:{labels:CAT_NAMES,datasets:[{data:CAT_NAMES.map(c=>avg(series(c,n))),backgroundColor:CAT_NAMES.map(c=>inCat(c)?CAT_COLORS[c]:DIM),borderRadius:6,borderSkipped:false,barThickness:14}]},
+   options:{indexAxis:"y",maintainAspectRatio:false,scales:{x:{...yPct(),grid:{color:"#2b3a4f",drawTicks:false}},y:{grid:{display:false},border:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.x}% average`}}}}});
+  mk("focusStack",{type:"bar",data:{labels:["Oct 12","Oct 19","Oct 26","Nov 2"],datasets:Object.entries(FOCUS_WEEKS).map(([c,d])=>({label:c,data:d,backgroundColor:inCat(c)?CAT_COLORS[c]:DIM,borderRadius:4,borderSkipped:false,maxBarThickness:40}))},
+   options:{maintainAspectRatio:false,scales:{x:{...xPlain(),stacked:true},y:{stacked:true,ticks:{callback:v=>v+"h",padding:8},grid:{color:"#2b3a4f",drawTicks:false},border:{display:false,dash:[4,4]}}},interaction:{mode:"index",intersect:false},plugins:{tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}h`}}}}});
+  const comp=Math.round(n*.75),intr=Math.max(1,Math.round(n*.1));
+  mk("sessions",donutCfg(["Completed","Interrupted"],[comp,intr],["#F4B8CE","#5E7391"],"76%"));
+ }
+};
+
+/* ================= render & events ================= */
+function navLink(n){return `<a class="${state.page===n.id?"active":""}" data-go="${n.id}" title="${n.l}">${ic(n.i)}<span class="label">${n.l}</span></a>`}
+function render(){
+ charts.splice(0).forEach(c=>c.destroy());
+ const app=$("#app");
+ if(!state.authed){app.classList.add("auth");$("#main").innerHTML=loginView();lucide.createIcons();return}
+ app.classList.remove("auth");
+ $("#nav").innerHTML=NAV.map(n=>n.group
+  ?`<button class="grp" data-grp title="${n.group}">${ic(n.i)}<span class="label">${n.group}</span>${ic(state.catOpen?"chevron-down":"chevron-right",'class="label grp-chev"')}</button><div class="sub" ${state.catOpen?"":"hidden"}>${n.items.map(navLink).join("")}</div>`
+  :navLink(n)).join("");
+ $("#main").innerHTML=(pages[state.page]||(()=>placeholder(state.page)))();
+ lucide.createIcons();
+ (mounts[state.page]||(()=>{}))();
+}
+function closeDD(){document.querySelectorAll(".dd.open").forEach(d=>{d.classList.remove("open");d.querySelector("[data-dd-toggle]").setAttribute("aria-expanded","false")})}
+function logIn(){state.authed=true;state.page="dashboard";render();toast("Preview login: no real account is checked yet")}
+
+document.addEventListener("submit",e=>{if(e.target.id==="loginForm"){e.preventDefault();logIn()}});
+document.addEventListener("click",e=>{
+ const t=e.target;
+ const tg=t.closest("[data-dd-toggle]");
+ if(tg){const dd=tg.closest(".dd"),opening=!dd.classList.contains("open");closeDD();
+  if(opening){dd.classList.add("open");tg.setAttribute("aria-expanded","true");const it=dd.querySelector(".dd-item.sel")||dd.querySelector(".dd-item");requestAnimationFrame(()=>it.focus({preventScroll:true}))}return}
+ const st=t.closest("[data-set]");if(st){state[st.dataset.set]=st.dataset.val;render();return}
+ if(!t.closest(".dd"))closeDD();
+ const eye=t.closest("[data-eye]");if(eye){const pw=$("#pw");pw.type=pw.type==="password"?"text":"password";return}
+ const soon=t.closest("[data-soon]");if(soon){toast(`${soon.dataset.soon} comes with the real app`);return}
+ if(t.closest("#logout")){state.authed=false;render();return}
+ if(t.closest("[data-grp]")){state.catOpen=!state.catOpen;render();return}
+ const g=t.closest("[data-go]");if(g){state.page=g.dataset.go;render();$("#main").scrollTop=0;return}
+ const ln=t.closest("[data-line]");if(ln){const c=ln.dataset.line;state.hidden.has(c)?state.hidden.delete(c):state.hidden.add(c);ln.classList.toggle("off");const ch=window.Chart&&Chart.getChart("perf");if(ch){const i=CAT_NAMES.indexOf(c);ch.setDatasetVisibility(i,!state.hidden.has(c));ch.update()}return}
+ const day=t.closest("[data-day]");if(day){state.selDay=day.dataset.day;render();return}
+ const cal=t.closest("[data-cal]");if(cal&&!cal.disabled){state.calOffset=Math.min(0,state.calOffset+ +cal.dataset.cal);state.selDay=null;render();return}
+ const h=t.closest("[data-h]");if(h){const x=state.habits[+h.dataset.h];x.d=!x.d;render();if(x.d)toast("Nice work! Logged for today");return}
+ const tk=t.closest("[data-task]");if(tk){const x=state.tasks[+tk.dataset.task];x.d=!x.d;render();if(x.d)toast("Task completed");return}
+ const sc=t.closest("[data-sc]");if(sc){const x=state.selfcare[+sc.dataset.sc];x.d=!x.d;render();if(x.d)toast(`${x.n} logged. Next date updated`);return}
+ const sk=t.closest("[data-skin]");if(sk){const[k,i]=sk.dataset.skin.split("-");const x=state.skin[k][+i];x.d=!x.d;
+  if(k==="pm")habit("Evening skincare routine").d=state.skin.pm.every(p=>p.d);
+  if(k==="am")habit("Morning skincare routine").d=state.skin.am.every(p=>p.d);render();return}
+ const r=t.closest("[data-r]");if(r){const k=r.dataset.r,msg={done:"Marked done, stats updated",later:"Snoozed for 30 minutes",dismiss:"Dismissed (not marked done)"}[k];
+  if(state.page==="dashboard"){const rem=currentReminder();if(rem){if(k==="done"&&rem.h){habit(rem.h).d=true;if(rem.h==="Evening skincare routine")state.skin.pm.forEach(p=>p.d=true)}state.dismissed.add(rem.t)}render()}
+  else{const b=r.closest(".bubble");b.style.transition="opacity .2s";b.style.opacity="0";setTimeout(()=>b.remove(),200)}
+  toast(msg);return}
+ const fm=t.closest("[data-fm]");if(fm){state.focusMin=+fm.dataset.fm;render();return}
+ const bm=t.closest("[data-bm]");if(bm){state.breakMin=+bm.dataset.bm;render();return}
+ const md=t.closest("[data-mode]");if(md){state.mode=md.dataset.mode;render();return}
+ if(t.closest(".toggle")){t.closest(".toggle").classList.toggle("on");return}
+ if(t.closest("#startFocus")){toast("Preview only: the timer runs in the real app");return}
+ if(t.closest("#collapse")){$("#sidebar").classList.toggle("collapsed");setTimeout(()=>charts.forEach(c=>c.resize()),220);return}
+});
+document.addEventListener("keydown",e=>{
+ const dd=document.querySelector(".dd.open");
+ if(!dd){if(e.key==="ArrowDown"&&document.activeElement?.matches("[data-dd-toggle]")){e.preventDefault();document.activeElement.click()}return}
+ if(e.key==="Escape"){closeDD();dd.querySelector("[data-dd-toggle]").focus();return}
+ if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();const items=[...dd.querySelectorAll(".dd-item")];let i=items.indexOf(document.activeElement);
+  i=e.key==="ArrowDown"?Math.min(items.length-1,i+1):Math.max(0,i-1);items[i].focus()}
+});
+render();
+</script>
+</body>
+</html>

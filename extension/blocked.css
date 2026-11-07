@@ -1,0 +1,8 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; margin: 0; }
+body { min-height: 100vh; display: grid; place-items: center; background: radial-gradient(600px 400px at 50% 30%, rgba(244, 184, 206, .12), transparent 70%), #111722; color: #F5F6FA; font-family: Inter, "Segoe UI", system-ui, sans-serif; padding: 24px; }
+main { max-width: 440px; text-align: center; background: #202D3D; border: 1px solid #354154; border-radius: 22px; padding: 36px 30px; }
+img { border-radius: 18px; }
+h1 { font-size: 24px; margin: 18px 0 10px; letter-spacing: -.01em; }
+p { color: #AAB4C3; line-height: 1.55; }
+.pink { color: #F4B8CE; margin-top: 12px; font-weight: 600; }

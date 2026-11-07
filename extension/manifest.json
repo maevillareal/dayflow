@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "DAYFLOW Focus",
+  "version": "1.0.0",
+  "description": "Blocks distracting websites during DAYFLOW focus sessions and focus schedules.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7BZxlMj+ajzP+puCV5ckMDi1TQliCulPqOi9r7VX5zSi4IBK6pljTTKCQjkHw9RsbCf8ErFhwh+PO/kjc0sZEbVacTn0osfXILDs4z0vB6zghR6ZfBonX7vTi7+rPCF+3ingNBI9W5+VR2HN4oqfxjhEp3WQ+TGoEjr7WoQS8l0Hw1glqx28bjBnZTzjiYcYU/K5T6a3GR4Ny64J4hHXCVrceitdqsPjOu91pgqOYGlLVPSP0kMMoLTJGCqKHtK0m9pd7raKpRvWE+a9WsDrBM48Ee2k+jPpEqlqLvKBRr/n14YFcR5K1fY3uBakyJutm25qC51vcg/dL+f0uLWw5wIDAQAB",
+  "permissions": ["declarativeNetRequest", "storage", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:5173/*",
+      "http://127.0.0.1:5173/*",
+      "http://localhost:4173/*",
+      "https://maevillareal.github.io/*"
+    ]
+  },
+  "action": { "default_title": "DAYFLOW Focus", "default_popup": "popup.html", "default_icon": { "128": "icon-128.png" } },
+  "icons": { "128": "icon-128.png" },
+  "web_accessible_resources": [{ "resources": ["blocked.html", "blocked.css", "icon-128.png"], "matches": ["<all_urls>"] }]
+}
