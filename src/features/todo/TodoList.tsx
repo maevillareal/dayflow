@@ -5,7 +5,7 @@ import { useFilter, useToday } from "../../app/providers";
 import { toggleTask } from "../../data/actions";
 import { useDB, useStore } from "../../data/store";
 import type { Task } from "../../data/types";
-import { CAT_COLORS, inFilter } from "../../lib/categories";
+import { TASK_COLORS, inFilter } from "../../lib/categories";
 import { isoToKey, relativeDue } from "../../lib/dates";
 import { cx } from "../../lib/util";
 import { CategoryDropdown, CheckRow, Confirm, Empty, PageHeader, Seg } from "../../components/ui";
@@ -75,7 +75,7 @@ export function TodoList() {
               sub={
                 <>
                   <span className={cx(t.status === "open" && t.due_date && t.due_date < today && "overdue")}>{t.status === "done" && t.completed_at ? `Done ${relativeDue(today, isoToKey(t.completed_at)).toLowerCase()}` : t.due_date ? `Due ${relativeDue(today, t.due_date).toLowerCase()}` : "No due date"}</span>
-                  {" · "}<span className="cdot inline" style={{ background: CAT_COLORS[t.category] }} />{t.category}
+                  {" · "}<span className="cdot inline" style={{ background: TASK_COLORS[t.category] }} />{t.category}
                   {t.notes && <> · {t.notes}</>}
                 </>
               }

@@ -23,10 +23,20 @@ const toMin = (t) => {
   return h * 60 + m;
 };
 
+const WEEKDAYS = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+/** Weekday and minute-of-day in the app's time zone (DAYFLOW uses Eastern Time). */
+function wallClock(now, timeZone) {
+  try {
+    const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now).map((x) => [x.type, x.value]));
+    return { wd: WEEKDAYS[p.weekday], t: Number(p.hour) * 60 + Number(p.minute) };
+  } catch {
+    return { wd: now.getDay(), t: now.getHours() * 60 + now.getMinutes() };
+  }
+}
+
 /** The schedule active right now, if any. End before start means it runs past midnight. */
-function activeSchedule(schedules, now = new Date()) {
-  const wd = now.getDay();
-  const t = now.getHours() * 60 + now.getMinutes();
+function activeSchedule(schedules, timeZone, now = new Date()) {
+  const { wd, t } = wallClock(now, timeZone);
   for (const s of schedules) {
     const a = toMin(s.start);
     const b = toMin(s.end);
@@ -35,22 +45,22 @@ function activeSchedule(schedules, now = new Date()) {
     else if (b <= a && s.weekday === wd && t >= a) endsToday = b + 1440;
     else if (b <= a && (s.weekday + 1) % 7 === wd && t < b) endsToday = b;
     if (endsToday !== null) {
-      const until = new Date(now);
-      until.setHours(0, 0, 0, 0);
-      return { ...s, until: until.getTime() + endsToday * 60_000 };
+      // endsToday is minutes since that zone's midnight; turn the remaining minutes into a timestamp.
+      const minutesLeft = (endsToday - t + 1440) % 1440 || 1440;
+      return { ...s, until: now.getTime() + minutesLeft * 60_000 - now.getSeconds() * 1000 };
     }
   }
   return null;
 }
 
 async function apply() {
-  const { session = null, schedules = [] } = await chrome.storage.local.get(["session", "schedules"]);
+  const { session = null, schedules = [], timeZone = "America/New_York" } = await chrome.storage.local.get(["session", "schedules", "timeZone"]);
   let s = session;
   if (s && s.endsAt <= Date.now()) {
     s = null;
     await chrome.storage.local.set({ session: null });
   }
-  const sched = activeSchedule(schedules);
+  const sched = activeSchedule(schedules, timeZone);
   const domains = new Set([...(s?.domains ?? []), ...(sched?.domains ?? [])]);
   const allow = new Set([...(s?.allow ?? []), ...(sched?.allow ?? [])]);
   const rules = [];
@@ -90,7 +100,8 @@ async function handle(msg) {
         .slice(0, 50)
         .filter((s) => s && Number.isInteger(s.weekday) && s.weekday >= 0 && s.weekday <= 6 && TIME_RE.test(s.start) && TIME_RE.test(s.end) && s.start !== s.end)
         .map((s) => ({ weekday: s.weekday, start: s.start, end: s.end, domains: cleanDomains(s.domains), allow: cleanDomains(s.allow) }));
-      await chrome.storage.local.set({ schedules });
+      const timeZone = typeof msg.timeZone === "string" && /^[A-Za-z_]+\/[A-Za-z_]+$/.test(msg.timeZone) ? msg.timeZone : "America/New_York";
+      await chrome.storage.local.set({ schedules, timeZone });
       return { ok: true, version: VERSION, ...(await apply()) };
     }
     default:

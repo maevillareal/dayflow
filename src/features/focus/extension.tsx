@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useDB, useSettings } from "../../data/store";
 import { DEFAULT_EXTENSION_ID } from "../../lib/env";
+import { APP_TIME_ZONE } from "../../lib/dates";
 
 /**
  * Talks to the DAYFLOW Chrome extension directly from this page (chrome.runtime.sendMessage with the
@@ -15,7 +16,7 @@ type Msg =
   | { type: "ping" }
   | { type: "session.start"; domains: string[]; allow: string[]; endsAt: number; mode: string }
   | { type: "session.end" }
-  | { type: "schedules.set"; schedules: { weekday: number; start: string; end: string; domains: string[]; allow: string[] }[] };
+  | { type: "schedules.set"; timeZone: string; schedules: { weekday: number; start: string; end: string; domains: string[]; allow: string[] }[] };
 
 type ChromeRuntime = { sendMessage: (id: string, msg: unknown, cb: (resp: unknown) => void) => void; lastError?: unknown };
 const runtime = () => (window as unknown as { chrome?: { runtime?: ChromeRuntime } }).chrome?.runtime;
@@ -84,7 +85,7 @@ export function ExtensionProvider({ children }: { children: ReactNode }) {
     const schedules = db.focus_schedules
       .filter((s) => s.enabled && profiles.has(s.profile_id))
       .map((s) => ({ weekday: s.weekday, start: s.start_time, end: s.end_time, domains: profiles.get(s.profile_id)!.domains, allow: profiles.get(s.profile_id)!.allow }));
-    void send(idRef.current, { type: "schedules.set", schedules });
+    void send(idRef.current, { type: "schedules.set", timeZone: APP_TIME_ZONE, schedules });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.connected, schedKey]);
 

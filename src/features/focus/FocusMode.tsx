@@ -4,8 +4,8 @@ import { CalendarClock, CirclePlay, Coffee, Lock, Pause, Play, PlugZap, Plus, Sh
 import { useToast, useToday } from "../../app/providers";
 import { useDB, useStore } from "../../data/store";
 import type { FocusMode as Mode, FocusProfile } from "../../data/types";
-import { CATEGORIES, CAT_COLORS, type Category } from "../../lib/categories";
-import { isoToKey, lastNDays, monthStartKey, weekStartKey, WEEK_ORDER, WEEKDAY_SHORT } from "../../lib/dates";
+import { CATEGORIES, CAT_COLORS, isCategory, type Category } from "../../lib/categories";
+import { fmtTime, isoToKey, lastNDays, monthStartKey, weekStartKey, WEEK_ORDER, WEEKDAY_SHORT } from "../../lib/dates";
 import { cx, fmtMin, normalizeDomain, sum, uid } from "../../lib/util";
 import { Confirm, Empty, Field, PageHeader, Toggle } from "../../components/ui";
 import { CompanionNote } from "../../companions/reminders";
@@ -30,7 +30,8 @@ export function FocusMode() {
   const [params] = useSearchParams();
   const presetTask = db.tasks.find((t) => t.id === params.get("task"));
 
-  const [category, setCategory] = useState<Category>(presetTask?.category ?? "MVG");
+  // A General task has no habit category, so the session keeps the chosen category (MVG by default).
+  const [category, setCategory] = useState<Category>(presetTask && isCategory(presetTask.category) ? presetTask.category : "MVG");
   const [taskId, setTaskId] = useState<string>(presetTask?.id ?? "");
   const [minutes, setMinutes] = useState(25);
   const [breakMin, setBreakMin] = useState(5);
@@ -43,7 +44,7 @@ export function FocusMode() {
   useEffect(() => {
     if (presetTask) {
       setTaskId(presetTask.id);
-      setCategory(presetTask.category);
+      if (isCategory(presetTask.category)) setCategory(presetTask.category);
     }
   }, [presetTask]);
 
@@ -96,7 +97,7 @@ export function FocusMode() {
   const blockingLine = !ext.status.connected ? (
     <>Blocking: <b>not active</b>. Connect the DAYFLOW Chrome extension (Settings → Website blocking) so it can block sites and confirm it here.</>
   ) : ext.status.active ? (
-    <>Blocking: <b>active</b>, confirmed by the extension ({ext.status.ruleCount} rule{ext.status.ruleCount === 1 ? "" : "s"}{ext.status.until ? `, until ${new Date(ext.status.until).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}).</>
+    <>Blocking: <b>active</b>, confirmed by the extension ({ext.status.ruleCount} rule{ext.status.ruleCount === 1 ? "" : "s"}{ext.status.until ? `, until ${fmtTime(ext.status.until, { hour: "numeric", minute: "2-digit" })} ET` : ""}).</>
   ) : (
     <>Extension connected. Blocking turns on when a session starts{ext.status.scheduledNow ? "" : " or a schedule begins"}.</>
   );
@@ -114,7 +115,7 @@ export function FocusMode() {
               </select>
             </Field>
             <Field label="Related task (optional)">
-              <select className="input" value={taskId} onChange={(e) => { setTaskId(e.target.value); const t = db.tasks.find((x) => x.id === e.target.value); if (t) setCategory(t.category); }}>
+              <select className="input" value={taskId} onChange={(e) => { setTaskId(e.target.value); const t = db.tasks.find((x) => x.id === e.target.value); if (t && isCategory(t.category)) setCategory(t.category); }}>
                 <option value="">None</option>
                 {openTasks.map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}
               </select>
@@ -274,7 +275,7 @@ export function FocusMode() {
             {stats.recent.map((s) => (
               <div key={s.id} className="recent-row">
                 <span className="cdot" style={{ background: CAT_COLORS[s.category] }} />
-                <span>{new Date(s.started_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</span>
+                <span>{fmtTime(s.started_at, { weekday: "short", hour: "numeric", minute: "2-digit" })}</span>
                 <span className="muted">{s.category}</span>
                 <span>{fmtMin(s.actual_sec / 60)}</span>
                 <span className={cx("tag", s.status === "completed" ? "ok" : "")}>{s.status === "completed" ? "Completed" : s.status === "interrupted" ? "Interrupted" : "Ended early"}</span>

@@ -52,7 +52,7 @@ export function deleteHabit(store: Store, h: Habit) {
 
 export type TaskDraft = Pick<Task, "title" | "description" | "category" | "priority" | "due_date" | "notes">;
 export function saveTask(store: Store, d: TaskDraft, existing?: Task) {
-  const base: Task = existing ?? { id: uid(), title: "", description: "", category: "MVG", priority: "Medium", due_date: null, status: "open", notes: "", completed_at: null };
+  const base: Task = existing ?? { id: uid(), title: "", description: "", category: "General", priority: "Medium", due_date: null, status: "open", notes: "", completed_at: null };
   store.upsert("tasks", [{ ...base, ...d, title: d.title.trim() }]);
 }
 export function toggleTask(store: Store, t: Task) {

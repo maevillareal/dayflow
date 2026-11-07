@@ -34,5 +34,11 @@ export const CAT_COMPANION: Record<Category, "dog" | "cat"> = {
   "No Sugar": "cat",
 };
 
-export const inFilter = (c: Category, f: CategoryFilter) => f === "All" || c === f;
+/** Tasks can also be "General": everyday to-dos that don't belong to a habit category. */
+export const TASK_CATEGORIES = ["General", ...CATEGORIES] as const;
+export type TaskCategory = (typeof TASK_CATEGORIES)[number];
+export const TASK_COLORS: Record<TaskCategory, string> = { General: "#AAB4C3", ...CAT_COLORS };
+
+/** General tasks only appear under All Progress. */
+export const inFilter = (c: TaskCategory, f: CategoryFilter) => f === "All" || c === f;
 export const isCategory = (v: unknown): v is Category => CATEGORIES.includes(v as Category);

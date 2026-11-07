@@ -1,6 +1,6 @@
 import type { ReminderState, Routine, Settings } from "../data/types";
 import { CAT_COMPANION, type Category } from "../lib/categories";
-import { todayKey, type DateKey } from "../lib/dates";
+import { todayKey, zoned, type DateKey } from "../lib/dates";
 import { hash01 } from "../lib/util";
 import { isDone, isHabitDue } from "./schedule";
 import { dueInfo, isDueNow, nextDue } from "./selfcare";
@@ -44,7 +44,8 @@ const toMin = (hhmm: string) => {
 
 /** Quiet hours may cross midnight (22:00 → 07:00). */
 export function inQuietHours(now: Date, start: string, end: string) {
-  const t = now.getHours() * 60 + now.getMinutes();
+  const z = zoned(now);
+  const t = z.getHours() * 60 + z.getMinutes();
   const s = toMin(start);
   const e = toMin(end);
   if (s === e) return false;
@@ -74,7 +75,7 @@ export function buildReminders(ctx: Ctx, now: Date, settings: Settings, opts: { 
     if (isSuppressed(states.get(r.key), now, today)) return;
     out.push({ ...r, who: whoFor(r.category) });
   };
-  const hour = now.getHours();
+  const hour = zoned(now).getHours();
 
   // Skin care: morning routine before noon, evening routine from 6pm.
   const routine: Routine | null = hour >= 5 && hour < 12 ? "am" : hour >= 18 ? "pm" : null;

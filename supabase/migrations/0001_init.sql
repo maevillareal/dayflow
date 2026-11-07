@@ -60,7 +60,7 @@ create table if not exists public.tasks (
   user_id uuid not null default auth.uid() references auth.users on delete cascade,
   title text not null check (char_length(title) between 1 and 300),
   description text not null default '',
-  category text not null check (category in ('MVG','Exercise','Self Care','Skin Care','Eat Healthy','No Sugar')),
+  category text not null check (category in ('General','MVG','Exercise','Self Care','Skin Care','Eat Healthy','No Sugar')),
   priority text not null check (priority in ('High','Medium','Low')),
   due_date date,
   status text not null default 'open' check (status in ('open','done')),

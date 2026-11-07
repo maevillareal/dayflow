@@ -7,7 +7,7 @@ import { useCtx, useDB, useStore } from "../../data/store";
 import { canCheck, isDone } from "../../domain/schedule";
 import { lastDone, nextDue } from "../../domain/selfcare";
 import { activesOn } from "../../domain/skincare";
-import { CAT_COLORS, inFilter } from "../../lib/categories";
+import { TASK_COLORS, inFilter } from "../../lib/categories";
 import { addDaysKey, daysBetween, fmt, fromKey, monthStartKey, toKey, weekdayOf, WEEK_ORDER, WEEKDAY_SHORT, type DateKey } from "../../lib/dates";
 import { cx } from "../../lib/util";
 import { CategoryDropdown, CheckRow, Empty, PageHeader } from "../../components/ui";
@@ -71,7 +71,7 @@ export function CalendarPage() {
                 <button key={d} className={cx("day", d === today && "today", d === sel && "sel", d < today && "past")} onClick={() => setSel(d)}>
                   <div className="n">{fmt(d, "d")}</div>
                   <div className="pills">
-                    {tk.slice(0, 2).map((t) => <span key={t.id} className={cx("pill", t.status === "done" && "done")} style={{ borderColor: CAT_COLORS[t.category] }}>{t.title}</span>)}
+                    {tk.slice(0, 2).map((t) => <span key={t.id} className={cx("pill", t.status === "done" && "done")} style={{ borderColor: TASK_COLORS[t.category] }}>{t.title}</span>)}
                     {tk.length > 2 && <span className="pill more">+{tk.length - 2} tasks</span>}
                     {sc.length > 0 && <span className="pill sc">{sc.length === 1 ? sc[0].name : `${sc.length} self-care`}</span>}
                     {ac.length > 0 && <span className="pill sk">{ac.map((a) => a.name).join(" + ")}</span>}
@@ -86,7 +86,7 @@ export function CalendarPage() {
         <div className="card">
           <h3><span className="t">{fmt(sel, "EEEE, MMMM d")}</span>{sel === today && <span className="tag pink">Today</span>}</h3>
           <div className="sec-lab"><ListChecks size={13} />TASKS DUE</div>
-          {selTasks.length ? selTasks.map((t) => <CheckRow key={t.id} done={t.status === "done"} onToggle={() => toggleTask(store, t)} title={t.title} sub={`${t.category} · ${t.priority}`} dot={CAT_COLORS[t.category]} />) : <Empty>No tasks due.</Empty>}
+          {selTasks.length ? selTasks.map((t) => <CheckRow key={t.id} done={t.status === "done"} onToggle={() => toggleTask(store, t)} title={t.title} sub={`${t.category} · ${t.priority}`} dot={TASK_COLORS[t.category]} />) : <Empty>No tasks due.</Empty>}
           <div className="sec-lab"><Repeat size={13} />HABITS</div>
           {selHabits.length ? (
             <p className="small">{selHabits.filter((h) => isDone(ctx.idx, h.id, sel)).length} of {selHabits.length} {sel > today ? "scheduled" : "done"}{sel > today ? "" : ""}: {selHabits.map((h) => h.name).join(", ")}</p>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { saveTask, type TaskDraft } from "../../data/actions";
 import { useStore } from "../../data/store";
 import type { Priority, Task } from "../../data/types";
-import { CATEGORIES, type Category } from "../../lib/categories";
+import { TASK_CATEGORIES, type Category, type TaskCategory } from "../../lib/categories";
 import { Field, Modal } from "../../components/ui";
 import { useToday } from "../../app/providers";
 
@@ -12,7 +12,7 @@ export function TaskModal({ task, defaultCategory, onClose }: { task?: Task; def
   const [d, setD] = useState<TaskDraft>(() =>
     task
       ? { title: task.title, description: task.description, category: task.category, priority: task.priority, due_date: task.due_date, notes: task.notes }
-      : { title: "", description: "", category: defaultCategory ?? "MVG", priority: "Medium", due_date: today, notes: "" },
+      : { title: "", description: "", category: defaultCategory ?? "General", priority: "Medium", due_date: today, notes: "" },
   );
   const ok = d.title.trim().length > 0;
   const save = () => {
@@ -42,8 +42,8 @@ export function TaskModal({ task, defaultCategory, onClose }: { task?: Task; def
         </Field>
         <div className="row-2">
           <Field label="Category">
-            <select className="input" value={d.category} onChange={(e) => setD({ ...d, category: e.target.value as Category })}>
-              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            <select className="input" value={d.category} onChange={(e) => setD({ ...d, category: e.target.value as TaskCategory })}>
+              {TASK_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
             </select>
           </Field>
           <Field label="Priority">

@@ -1,4 +1,4 @@
-import { daysBetween, type DateKey } from "./dates";
+import { daysBetween, zoned, type DateKey } from "./dates";
 
 export const QUOTES = [
   "Consistency over perfection.",
@@ -15,7 +15,7 @@ export const QUOTES = [
 export const quoteFor = (day: DateKey) => QUOTES[((daysBetween("2026-01-01", day) % QUOTES.length) + QUOTES.length) % QUOTES.length];
 
 export function greeting(now: Date) {
-  const h = now.getHours();
+  const h = zoned(now).getHours();
   if (h < 5) return "Good evening";
   if (h < 12) return "Good morning";
   if (h < 18) return "Good afternoon";

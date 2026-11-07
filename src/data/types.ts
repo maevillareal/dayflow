@@ -1,4 +1,4 @@
-import type { Category } from "../lib/categories";
+import type { Category, TaskCategory } from "../lib/categories";
 import type { DateKey } from "../lib/dates";
 
 export interface Row {
@@ -55,7 +55,7 @@ export type Priority = "High" | "Medium" | "Low";
 export interface Task extends Row {
   title: string;
   description: string;
-  category: Category;
+  category: TaskCategory;
   priority: Priority;
   due_date: DateKey | null;
   status: "open" | "done";

@@ -42,5 +42,6 @@ export default defineConfig({
       workbox: { globPatterns: ["**/*.{js,css,html,svg,png,woff2}"], navigateFallbackDenylist: [/^\/auth/] },
     }),
   ],
-  test: { environment: "node", include: ["src/**/*.test.ts"] },
+  // Tests write times like "14:00" meaning Eastern Time, the app's time zone.
+  test: { environment: "node", include: ["src/**/*.test.ts"], env: { TZ: "America/New_York" } },
 });
