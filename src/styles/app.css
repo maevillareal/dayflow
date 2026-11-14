@@ -82,7 +82,9 @@ h2 { font-size: 17px; font-weight: 600; }
 .sub { color: var(--muted); margin-top: 4px; line-height: 1.45; }
 .hero-head { flex: 1; min-width: 280px; }
 .hero-head .greet { color: var(--muted); font-size: 15px; font-weight: 500; }
-.topbar.hero .motto { flex: 1 1 100%; order: 3; font-size: clamp(28px, 3.4vw, 46px); font-weight: 700; letter-spacing: -.03em; line-height: 1.15; margin-top: -6px; color: var(--pink2); white-space: nowrap; overflow: hidden; min-width: 0; max-width: 100%; }
+.topbar.hero .motto-row { flex: 1 1 100%; order: 3; display: flex; align-items: center; gap: 12px; min-width: 0; margin-top: -6px; }
+.topbar.hero .motto-row .icon-btn { width: 32px; height: 32px; }
+.topbar.hero .motto { flex: 0 1 auto; font-size: clamp(28px, 3.4vw, 46px); font-weight: 700; letter-spacing: -.03em; line-height: 1.15; color: var(--pink2); white-space: nowrap; overflow: hidden; min-width: 0; max-width: 100%; }
 .topbar.hero .motto-line { display: inline-block; white-space: nowrap; }
 .topbar.hero .motto-author { font-size: .42em; font-weight: 500; letter-spacing: 0; color: var(--muted); margin-left: .7em; vertical-align: middle; }
 .topbar.hero .motto q { quotes: "\201C" "\201D"; }

@@ -12,7 +12,7 @@ import { activeConflicts, isRestNight, routineStatus } from "../../domain/skinca
 import { activeHabits, dayCount, makeCtx, pctOf, series, showUpStreak } from "../../domain/stats";
 import { CATEGORIES, CAT_COLORS, inFilter } from "../../lib/categories";
 import { addDaysKey, fmt, isoToKey, lastNDays, relativeDue, weekKeys, weekdayOf } from "../../lib/dates";
-import { greeting, quoteFor } from "../../lib/quotes";
+import { greeting } from "../../lib/quotes";
 import { cx, fmtMin, sum } from "../../lib/util";
 import { areaLine, multiLine } from "../../charts/charts";
 import { CategoryDropdown, CheckRow, Empty, Seg, Spark } from "../../components/ui";
@@ -159,7 +159,7 @@ export function Dashboard() {
           <Link className="btn" to="/focus"><Timer size={16} />Focus mode</Link>
           <CategoryDropdown value={filter} onChange={setFilter} pctFor={(c) => pctOf(dayCount(ctx, today, c))} />
         </div>
-        <OneLineQuote quote={quoteFor(today)} />
+        <OneLineQuote day={today} />
       </div>
 
       <div className="grid" style={{ gap: 16 }}>

@@ -106,7 +106,8 @@ export const QUOTES: Quote[] = [
 ];
 
 /** One quote per day, the same all day. */
-export const quoteFor = (day: DateKey) => QUOTES[((daysBetween("2026-01-01", day) % QUOTES.length) + QUOTES.length) % QUOTES.length];
+export const quoteIndexFor = (day: DateKey) => ((daysBetween("2026-01-01", day) % QUOTES.length) + QUOTES.length) % QUOTES.length;
+export const quoteFor = (day: DateKey) => QUOTES[quoteIndexFor(day)];
 
 export function greeting(now: Date) {
   const h = zoned(now).getHours();
