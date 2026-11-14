@@ -16,6 +16,7 @@ import { greeting, quoteFor } from "../../lib/quotes";
 import { cx, fmtMin, sum } from "../../lib/util";
 import { areaLine, multiLine } from "../../charts/charts";
 import { CategoryDropdown, CheckRow, Empty, Seg, Spark } from "../../components/ui";
+import { OneLineQuote } from "../../components/OneLineQuote";
 import { ReminderCard } from "../../companions/reminders";
 import { TaskModal } from "../todo/TaskModal";
 
@@ -151,7 +152,6 @@ export function Dashboard() {
       <div className="topbar hero">
         <div className="hero-head">
           <div className="greet">{greeting(now)}{name ? `, ${name}` : ""}</div>
-          <div className="motto"><q>{quoteFor(today)}</q></div>
         </div>
         <div className="hdr-actions">
           <button className="icon-btn" title="Notifications and reminders" onClick={() => navigate("/settings#notifications")}><Bell size={17} /></button>
@@ -159,6 +159,7 @@ export function Dashboard() {
           <Link className="btn" to="/focus"><Timer size={16} />Focus mode</Link>
           <CategoryDropdown value={filter} onChange={setFilter} pctFor={(c) => pctOf(dayCount(ctx, today, c))} />
         </div>
+        <OneLineQuote quote={quoteFor(today)} />
       </div>
 
       <div className="grid" style={{ gap: 16 }}>
